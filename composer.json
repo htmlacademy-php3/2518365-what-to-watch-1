@@ -1,0 +1,13 @@
+{
+  "name": "kiselev-academy/what-to-watch",
+  "description": "what-to-watch",
+  "autoload": {
+    "psr-4": {
+      "WhatToWatch\\": "app/"
+    }
+  },
+  "require": {
+    "php": ">=8.3.0",
+    "guzzlehttp/guzzle": "^7.10"
+  }
+}
