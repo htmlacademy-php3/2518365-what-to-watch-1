@@ -17,10 +17,6 @@ class FavoriteController extends Controller
      */
     public function index(): BaseResponse
     {
-        if (false) {
-            return new FailResponse('Необходима авторизация', Response::HTTP_UNAUTHORIZED);
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {
@@ -37,10 +33,6 @@ class FavoriteController extends Controller
      */
     public function store(Request $request, string $id): BaseResponse
     {
-        if (false) {
-            return new FailResponse('Необходима авторизация', Response::HTTP_UNAUTHORIZED);
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {
@@ -56,10 +48,6 @@ class FavoriteController extends Controller
      */
     public function destroy(string $id): BaseResponse
     {
-        if (false) {
-            return new FailResponse('Необходима авторизация', Response::HTTP_UNAUTHORIZED);
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {

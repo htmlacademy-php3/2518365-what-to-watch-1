@@ -17,10 +17,6 @@ class UserController extends Controller
      */
     public function show(): BaseResponse
     {
-        if (false) {
-            return new FailResponse('Необходима авторизация', Response::HTTP_UNAUTHORIZED);
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {
@@ -36,10 +32,6 @@ class UserController extends Controller
      */
     public function update(Request $request): BaseResponse
     {
-        if (false) {
-            return new FailResponse();
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {

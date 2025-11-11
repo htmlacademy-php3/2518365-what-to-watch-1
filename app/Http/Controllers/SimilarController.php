@@ -17,10 +17,6 @@ class SimilarController extends Controller
      */
     public function index(string $id): BaseResponse
     {
-        if (!$id) {
-            return new FailResponse('Объект не найден', Response::HTTP_NOT_FOUND);
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {

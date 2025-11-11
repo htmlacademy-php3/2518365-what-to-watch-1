@@ -33,14 +33,6 @@ class GenreController extends Controller
      */
     public function update(Request $request, string $id): BaseResponse
     {
-        if (false) {
-            return new FailResponse('Необходима авторизация', Response::HTTP_UNAUTHORIZED);
-        }
-
-        if (!$id) {
-            return new FailResponse('Объект не найден', Response::HTTP_NOT_FOUND);
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {

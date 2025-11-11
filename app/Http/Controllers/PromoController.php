@@ -32,10 +32,6 @@ class PromoController extends Controller
      */
     public function store(Request $request): BaseResponse
     {
-        if (false) {
-            return new FailResponse('Необходима авторизация', Response::HTTP_UNAUTHORIZED);
-        }
-
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {
