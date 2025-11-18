@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Film;
 use Illuminate\Http\Request;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\SuccessResponse;
@@ -28,10 +29,10 @@ class FavoriteController extends Controller
      * Добавление фильма в избранное
      *
      * @param Request $request Запрос
-     * @param string $id ID фильма
+     * @param Film $film Объект фильма
      * @return BaseResponse
      */
-    public function store(Request $request, string $id): BaseResponse
+    public function store(Request $request, Film $film): BaseResponse
     {
         try {
             return new SuccessResponse();
@@ -43,10 +44,10 @@ class FavoriteController extends Controller
     /**
      * Удаление фильма из избранного
      *
-     * @param string $id ID фильма
+     * @param Film $film Объект фильма
      * @return BaseResponse
      */
-    public function destroy(string $id): BaseResponse
+    public function destroy(Film $film): BaseResponse
     {
         try {
             return new SuccessResponse();

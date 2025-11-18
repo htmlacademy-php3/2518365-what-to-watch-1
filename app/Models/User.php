@@ -2,11 +2,74 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Carbon;
 
+/**
+ * @property int $id
+ * @property string $name
+ * @property string $email
+ * @property string $password
+ * @property string|null $avatar
+ * @property string $role
+ * @property Carbon $created_at
+ * @property Carbon $updated_at
+ *
+ * @property Collection|Film[] $favoriteFilms
+ * @property Collection|Comment[] $comments
+ */
 class User extends Model
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
+    use HasFactory, Notifiable;
+
+    public const string ROLE_USER = 'user';
+    public const string ROLE_MODERATOR = 'moderator';
+
+    /**
+     * Атрибуты
+     *
+     * @var string[]
+     */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'avatar',
+        'role',
+    ];
+
+    /**
+     * Скрытые атрибуты
+     *
+     * @var string[]
+     */
+    protected $hidden = [
+        'password',
+    ];
+
+    /**
+     * Связь "многие ко многим" к модели Film
+     *
+     * @return BelongsToMany
+     */
+    public function favoriteFilms(): BelongsToMany
+    {
+        return $this->belongsToMany(Film::class, 'user_favorites');
+    }
+
+    /**
+     * Связь "один ко многим" к модели Comment
+     *
+     * @return HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(Comment::class);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +10,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class UserFactory extends Factory
 {
+    protected $model = User::class;
     /**
      * Define the model's default state.
      *
@@ -17,7 +19,11 @@ class UserFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'name' => $this->faker->name,
+            'email' => $this->faker->unique()->safeEmail,
+            'password' => bcrypt('password'),
+            'avatar' => $this->faker->imageUrl(128, 128, 'people'),
+            'role' => $this->faker->randomElement([User::ROLE_MODERATOR, User::ROLE_USER,]),
         ];
     }
 }

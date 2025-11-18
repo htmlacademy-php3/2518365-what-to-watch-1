@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Film;
 use Illuminate\Http\Request;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\SuccessResponse;
@@ -48,13 +49,13 @@ class FilmController extends Controller
     /**
      * Получение информации о фильме
      *
-     * @param string $id ID фильма
+     * @param Film $film Объект фильма
      * @return BaseResponse Ответ
      */
-    public function show(string $id): BaseResponse
+    public function show(Film $film): BaseResponse
     {
         try {
-            return new SuccessResponse();
+            return new SuccessResponse($film);
         } catch (\Exception $e) {
             return new FailResponse(null, null, $e);
         }
@@ -64,10 +65,10 @@ class FilmController extends Controller
      * Редактирование фильма
      *
      * @param Request $request Запрос
-     * @param string $id ID фильма
+     * @param Film $film Объект фильма
      * @return BaseResponse Ответ
      */
-    public function update(Request $request, string $id): BaseResponse
+    public function update(Request $request, Film $film): BaseResponse
     {
         try {
             return new SuccessResponse();
