@@ -27,7 +27,7 @@ return new class extends Migration
             $table->decimal('rating', 3, 1)->nullable();
             $table->integer('scores_count')->nullable();
             $table->string('imdb_id')->unique();
-            $table->enum('status', ['pending', 'moderate', 'ready']);
+            $table->enum('status', ['pending', 'moderate', 'ready'])->default('ready');
             $table->timestamps();
         });
     }

@@ -23,7 +23,7 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
+Route::mfilmdleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
 
@@ -38,15 +38,15 @@ Route::prefix('/user')->group(function () {
 });
 
 Route::prefix('/films')->group(function () {
-    Route::post('/{id}/favorite/', [FavoriteController::class, 'store']);
-    Route::delete('/{id}/favorite/', [FavoriteController::class, 'destroy']);
+    Route::post('/{film}/favorite/', [FavoriteController::class, 'store']);
+    Route::delete('/{film}/favorite/', [FavoriteController::class, 'destroy']);
     Route::get('/', [FilmController::class, 'index']);
-    Route::get('/{id}', [FilmController::class, 'show']);
+    Route::get('/{film}', [FilmController::class, 'show']);
     Route::post('/', [FilmController::class, 'store']);
-    Route::patch('/{id}', [FilmController::class, 'update']);
-    Route::get('/{id}/similar', [SimilarController::class, 'index']);
-    Route::get('/{id}/comments', [CommentController::class, 'index']);
-    Route::post('/{id}/comments', [CommentController::class, 'store']);
+    Route::patch('/{film}', [FilmController::class, 'update']);
+    Route::get('/{film}/similar', [SimilarController::class, 'index']);
+    Route::get('/{film}/comments', [CommentController::class, 'index']);
+    Route::post('/{film}/comments', [CommentController::class, 'store']);
 });
 
 Route::prefix('/genres')->group(function () {
@@ -61,5 +61,5 @@ Route::prefix('/comments')->group(function () {
 
 Route::prefix('/promo')->group(function () {
     Route::get('/', [PromoController::class, 'index']);
-    Route::post('/{id}', [PromoController::class, 'store']);
+    Route::post('/{film}', [PromoController::class, 'store']);
 });

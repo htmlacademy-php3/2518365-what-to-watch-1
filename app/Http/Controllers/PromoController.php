@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Film;
+use App\Models\Promo;
 use Illuminate\Http\Request;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\SuccessResponse;
@@ -18,7 +20,8 @@ class PromoController extends Controller
     public function index(): BaseResponse
     {
         try {
-            return new SuccessResponse();
+            $promo = Promo::latest()->first();
+            return new SuccessResponse($promo);
         } catch (\Exception $e) {
             return new FailResponse(null, null, $e);
         }
@@ -28,9 +31,10 @@ class PromoController extends Controller
      * Установка нового промо-фильма
      *
      * @param Request $request Запрос
+     * @param Film $film Объект фильма
      * @return BaseResponse Ответ
      */
-    public function store(Request $request): BaseResponse
+    public function store(Request $request, Film $film): BaseResponse
     {
         try {
             return new SuccessResponse();

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
+use App\Models\Film;
 use Illuminate\Http\Request;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\SuccessResponse;
@@ -13,13 +15,14 @@ class CommentController extends Controller
     /**
      * Получение отзывов к фильму
      *
-     * @param string $filmId ID фильма
+     * @param Film $film Объект фильма
      * @return BaseResponse Ответ
      */
-    public function index(string $filmId): BaseResponse
+    public function index(Film $film): BaseResponse
     {
         try {
-            return new SuccessResponse();
+            $comments = $film->comments;
+            return new SuccessResponse($comments);
         } catch (\Exception $e) {
             return new FailResponse(null, null, $e);
         }
@@ -29,10 +32,10 @@ class CommentController extends Controller
      * Добавление отзыва к фильму
      *
      * @param Request $request Запрос
-     * @param string $filmId ID фильма
+     * @param Film $film Объект фильма
      * @return BaseResponse Ответ
      */
-    public function store(Request $request, string $filmId): BaseResponse
+    public function store(Request $request, Film $film): BaseResponse
     {
         try {
             return new SuccessResponse();
@@ -45,10 +48,10 @@ class CommentController extends Controller
      * Редактирование отзыва к фильму
      *
      * @param Request $request Запрос
-     * @param string $id ID отзыва
-     * @return BaseResponse
+     * @param Comment $comment Объект отзыва
+     * @return BaseResponse Ответ
      */
-    public function update(Request $request, string $id): BaseResponse
+    public function update(Request $request, Comment $comment): BaseResponse
     {
         try {
             return new SuccessResponse();
@@ -60,10 +63,10 @@ class CommentController extends Controller
     /**
      * Удаление отзыва к фильму
      *
-     * @param string $id ID отзыва
-     * @return BaseResponse
+     * @param Comment $comment Объект отзыва
+     * @return BaseResponse Ответ
      */
-    public function destroy(string $id): BaseResponse
+    public function destroy(Comment $comment): BaseResponse
     {
         try {
             return new SuccessResponse();

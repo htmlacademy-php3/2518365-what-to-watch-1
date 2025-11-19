@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Film;
+use App\Models\Promo;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
@@ -9,6 +11,7 @@ use Illuminate\Database\Eloquent\Factories\Factory;
  */
 class PromoFactory extends Factory
 {
+    protected $model = Promo::class;
     /**
      * Define the model's default state.
      *
@@ -17,7 +20,7 @@ class PromoFactory extends Factory
     public function definition(): array
     {
         return [
-            //
+            'film_id' => Film::factory(),
         ];
     }
 }
