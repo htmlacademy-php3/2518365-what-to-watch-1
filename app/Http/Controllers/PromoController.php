@@ -30,10 +30,11 @@ class PromoController extends Controller
     /**
      * Установка нового промо-фильма
      *
+     * @param Request $request Запрос
      * @param Film $film Объект фильма
      * @return BaseResponse Ответ
      */
-    public function store(Film $film): BaseResponse
+    public function store(Request $request, Film $film): BaseResponse
     {
         try {
             return new SuccessResponse();
