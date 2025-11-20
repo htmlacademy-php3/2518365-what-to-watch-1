@@ -16,7 +16,7 @@ class FailResponse extends BaseResponse
             $statusCode = $statusCode ?? Response::HTTP_BAD_REQUEST;
         }
         $this->errorMessage = $errorMessage ?? $exception->getMessage();
-        $statusCode = $statusCode ?? $exception->getCode();
+        $statusCode = $statusCode ?? ($exception->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
 
         parent::__construct(null, $statusCode);
     }

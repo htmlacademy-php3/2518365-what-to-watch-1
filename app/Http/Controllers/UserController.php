@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Http\Responses\BaseResponse;
-use App\Http\Responses\SuccessResponse;
 use App\Http\Responses\FailResponse;
-use Symfony\Component\HttpFoundation\Response;
+use App\Http\Responses\SuccessResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -18,7 +18,10 @@ class UserController extends Controller
     public function show(): BaseResponse
     {
         try {
-            return new SuccessResponse();
+            $user = Auth::user();
+            return new SuccessResponse([
+                'user' => $user,
+            ]);
         } catch (\Exception $e) {
             return new FailResponse(null, null, $e);
         }
