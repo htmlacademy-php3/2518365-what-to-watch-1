@@ -39,6 +39,14 @@ class Film extends Model
     /** @use HasFactory<\Database\Factories\FilmFactory> */
     use HasFactory;
 
+    public const string STATUS_READY = 'ready';
+    public const string STATUS_PENDING = 'pending';
+    public const string STATUS_MODERATE = 'moderate';
+    public const string ORDER_BY_RELEASED = 'released';
+    public const string ORDER_BY_RATING = 'rating';
+    public const string ORDER_TO_ASC = 'asc';
+    public const string ORDER_TO_DESC = 'desc';
+
     /**
      * Атрибуты
      *

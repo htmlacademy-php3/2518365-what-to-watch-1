@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Laravel\Sanctum\HasApiTokens;
@@ -24,7 +25,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property Collection|Film[] $favoriteFilms
  * @property Collection|Comment[] $comments
  */
-class User extends Model
+class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
@@ -71,5 +72,15 @@ class User extends Model
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);
+    }
+
+    /**
+     * Проверяет роль модератора у пользователя
+     *
+     * @return bool
+     */
+    public function isModerator(): bool
+    {
+        return $this->role === self::ROLE_MODERATOR;
     }
 }
