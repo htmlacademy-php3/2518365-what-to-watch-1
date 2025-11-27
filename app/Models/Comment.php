@@ -83,4 +83,14 @@ class Comment extends Model
     {
         return $this->hasMany(Comment::class, 'parent_id');
     }
+
+    /**
+     * Проверка на дочерние комментарии
+     *
+     * @return bool
+     */
+    public function isHaveChildren(): bool
+    {
+        return $this->children()->count() === 0;
+    }
 }

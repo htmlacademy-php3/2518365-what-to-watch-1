@@ -2,13 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Responses\BaseResponse;
+use App\Http\Responses\SuccessResponse;
 use App\Models\Film;
 use App\Models\Promo;
 use Illuminate\Http\Request;
-use App\Http\Responses\BaseResponse;
-use App\Http\Responses\SuccessResponse;
-use App\Http\Responses\FailResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class PromoController extends Controller
 {
@@ -19,12 +17,8 @@ class PromoController extends Controller
      */
     public function index(): BaseResponse
     {
-        try {
-            $promo = Promo::latest()->first();
-            return new SuccessResponse($promo);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $promo = Promo::latest()->first();
+        return new SuccessResponse($promo);
     }
 
     /**
@@ -36,10 +30,7 @@ class PromoController extends Controller
      */
     public function store(Request $request, Film $film): BaseResponse
     {
-        try {
-            return new SuccessResponse();
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $promo = Promo::create(['film_id' => $film->id]);
+        return new SuccessResponse($promo);
     }
 }

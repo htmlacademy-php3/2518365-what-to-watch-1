@@ -2,12 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Responses\BaseResponse;
+use App\Http\Responses\FailResponse;
+use App\Http\Responses\SuccessResponse;
 use App\Models\Film;
 use Illuminate\Http\Request;
-use App\Http\Responses\BaseResponse;
-use App\Http\Responses\SuccessResponse;
-use App\Http\Responses\FailResponse;
-use Symfony\Component\HttpFoundation\Response;
 
 class FavoriteController extends Controller
 {

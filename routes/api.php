@@ -29,7 +29,7 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 
 Route::post('/register', [RegisterController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanctum');
 Route::get('/favorite', [FavoriteController::class, 'index'])->middleware('auth:sanctum');
 
 Route::prefix('/user')->middleware('auth:sanctum')->group(function () {
@@ -42,8 +42,8 @@ Route::prefix('/films')->group(function () {
     Route::delete('/{film}/favorite/', [FavoriteController::class, 'destroy'])->middleware('auth:sanctum');
     Route::get('/', [FilmController::class, 'index']);
     Route::get('/{film}', [FilmController::class, 'show']);
-    Route::post('/', [FilmController::class, 'store']);
-    Route::patch('/{film}', [FilmController::class, 'update'])->middleware('auth:sanctum');
+    Route::post('/', [FilmController::class, 'store'])->middleware(['auth:sanctum', 'moderator']);
+    Route::patch('/{film}', [FilmController::class, 'update'])->middleware(['auth:sanctum', 'moderator']);
     Route::get('/{film}/similar', [SimilarController::class, 'index']);
     Route::get('/{film}/comments', [CommentController::class, 'index']);
     Route::post('/{film}/comments', [CommentController::class, 'store'])->middleware('auth:sanctum');
@@ -61,5 +61,5 @@ Route::prefix('/comments')->middleware('auth:sanctum')->group(function () {
 
 Route::prefix('/promo')->group(function () {
     Route::get('/', [PromoController::class, 'index']);
-    Route::post('/{film}', [PromoController::class, 'store'])->middleware('auth:sanctum');
+    Route::post('/{film}', [PromoController::class, 'store'])->middleware(['auth:sanctum', 'moderator']);
 });
