@@ -16,7 +16,7 @@ class GenreController extends Controller
      */
     public function index(): BaseResponse
     {
-        $genres = Genre::all();
+        $genres = Genre::paginate();
         return new SuccessResponse($genres);
     }
 

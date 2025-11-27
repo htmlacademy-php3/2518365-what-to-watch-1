@@ -46,7 +46,6 @@ class AuthController extends Controller
         try {
             Auth::user()->tokens()->delete();
             $request->session()->invalidate();
-            $request->session()->regenerate();
             return new SuccessResponse(null, Response::HTTP_NO_CONTENT);
         } catch (\Exception $e) {
             return new FailResponse(null, null, $e);

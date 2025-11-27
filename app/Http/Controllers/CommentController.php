@@ -10,7 +10,6 @@ use App\Models\Comment;
 use App\Models\Film;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Gate;
 use Symfony\Component\HttpFoundation\Response;
 
 class CommentController extends Controller
@@ -24,7 +23,7 @@ class CommentController extends Controller
     public function index(Film $film): BaseResponse
     {
         try {
-            $comments = $film->comments()->get();
+            $comments = Comment::where('film_id', $film->id)->simplePaginate();
             return new SuccessResponse($comments);
         } catch (\Exception $e) {
             return new FailResponse(null, null, $e);
@@ -62,7 +61,7 @@ class CommentController extends Controller
      */
     public function update(CommentRequest $request, Comment $comment): BaseResponse
     {
-        if (Gate::denies('comment-edit', $comment)) {
+        if (Auth::user()->cannot('update', $comment)) {
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
 
@@ -86,7 +85,7 @@ class CommentController extends Controller
      */
     public function destroy(Request $request, Comment $comment): BaseResponse
     {
-        if (Gate::denies('comment-delete', $comment)) {
+        if (Auth::user()->cannot('delete', $comment)) {
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
 

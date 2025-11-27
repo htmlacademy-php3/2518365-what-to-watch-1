@@ -8,7 +8,7 @@ use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Models\Film;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
 class FilmController extends Controller
@@ -30,7 +30,7 @@ class FilmController extends Controller
         $order_by = $request->query('order_by', Film::ORDER_BY_RELEASED);
         $order_to = $request->query('order_to', Film::ORDER_TO_DESC);
 
-        if (Gate::denies('view-films-with-status', $status)) {
+        if (Auth::user()->cannot('viewWithStatus', [Film::class, $status])) {
             return new FailResponse("Недостаточно прав для просмотра фильмов в статусе $status", Response::HTTP_FORBIDDEN);
         }
 
@@ -56,6 +56,9 @@ class FilmController extends Controller
      */
     public function store(Request $request): BaseResponse
     {
+        if (Auth::user()->cannot('create', Film::class)) {
+            return new FailResponse('Недостаточно прав для создания фильма', Response::HTTP_FORBIDDEN);
+        }
         try {
             return new SuccessResponse();
         } catch (\Exception $e) {
@@ -83,6 +86,9 @@ class FilmController extends Controller
      */
     public function update(Request $request, Film $film): BaseResponse
     {
+        if (Auth::user()->cannot('update', $film)) {
+            return new FailResponse('Недостаточно прав для редактирования фильма', Response::HTTP_FORBIDDEN);
+        }
         try {
             return new SuccessResponse($film);
         } catch (\Exception $e) {
