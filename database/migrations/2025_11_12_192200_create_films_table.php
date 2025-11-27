@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('director')->nullable();
             $table->year('released')->nullable();
             $table->integer('run_time')->nullable();
-            $table->decimal('rating', 3, 1)->nullable();
+            $table->float('rating')->nullable();
             $table->integer('scores_count')->nullable();
             $table->string('imdb_id')->unique();
             $table->enum('status', ['pending', 'moderate', 'ready'])->default('ready');

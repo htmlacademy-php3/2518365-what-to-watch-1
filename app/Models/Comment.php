@@ -30,6 +30,8 @@ class Comment extends Model
     /** @use HasFactory<\Database\Factories\CommentFactory> */
     use HasFactory;
 
+    public const string ANONYMOUS_USER = 'Анонимный пользователь';
+
     /**
      * Атрибуты
      *
@@ -42,6 +44,15 @@ class Comment extends Model
         'text',
         'rating',
         'is_external',
+    ];
+
+    /**
+     * Дополнительные атрибуты
+     *
+     * @var string[]
+     */
+    protected $appends = [
+        'author_name',
     ];
 
     /**
@@ -92,5 +103,19 @@ class Comment extends Model
     public function isHaveChildren(): bool
     {
         return $this->children()->count() === 0;
+    }
+
+    /**
+     * Получает имя автора
+     *
+     * @return string
+     */
+    public function getAuthorNameAttribute(): string
+    {
+        if ($this->is_external) {
+            return self::ANONYMOUS_USER;
+        }
+
+        return $this->user->name ?? self::ANONYMOUS_USER;
     }
 }
