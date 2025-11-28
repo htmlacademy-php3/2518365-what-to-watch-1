@@ -22,7 +22,7 @@ use Illuminate\Support\Carbon;
  * @property string|null $director
  * @property int|null $released
  * @property string|null $run_time
- * @property decimal|null $rating
+ * @property float|null $rating
  * @property int|null $scores_count
  * @property string|null $imdb_id
  * @property string|null $status
@@ -77,7 +77,7 @@ class Film extends Model
      */
     protected $casts = [
         'released' => 'integer',
-        'rating' => 'decimal:1',
+        'rating' => 'float',
     ];
 
     /**
@@ -119,4 +119,19 @@ class Film extends Model
     {
         return $this->hasMany(Comment::class);
     }
+
+    /**
+     * Получает рейтинг фильма
+     *
+     * @return void
+     */
+    public function rating(): void
+    {
+        $avgRating = $this->comments()->avg('rating');
+        $avgRating = $avgRating ? round($avgRating, 1) : 0;
+
+        $this->rating = $avgRating;
+        $this->save();
+    }
+
 }

@@ -18,7 +18,7 @@ return new class extends Migration
             $table->unsignedBigInteger('parent_id')->nullable()->constrained('comments');
             $table->text('text');
             $table->integer('rating');
-            $table->boolean('is_external')->default(0)->change();
+            $table->boolean('is_external')->default(0);
             $table->timestamps();
             $table->foreign('user_id')->references('id')->on('users')->onDelete('set null');
             $table->foreign('film_id')->references('id')->on('films')->onDelete('cascade');
