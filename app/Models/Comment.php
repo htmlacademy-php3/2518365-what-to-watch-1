@@ -13,7 +13,7 @@ use Illuminate\Support\Carbon;
  * @property int $id
  * @property int $user_id
  * @property int $film_id
- * @property int|null $parent_id
+ * @property int|null $comment_id
  * @property string $text
  * @property int|null $rating
  * @property bool $is_external
@@ -40,7 +40,7 @@ class Comment extends Model
     protected $fillable = [
         'user_id',
         'film_id',
-        'parent_id',
+        'comment_id',
         'text',
         'rating',
         'is_external',
@@ -82,7 +82,7 @@ class Comment extends Model
      */
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(Comment::class, 'parent_id');
+        return $this->belongsTo(Comment::class, 'comment_id');
     }
 
     /**
@@ -92,7 +92,7 @@ class Comment extends Model
      */
     public function children(): HasMany
     {
-        return $this->hasMany(Comment::class, 'parent_id');
+        return $this->hasMany(Comment::class, 'comment_id');
     }
 
     /**

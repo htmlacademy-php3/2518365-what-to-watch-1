@@ -22,12 +22,8 @@ class CommentController extends Controller
      */
     public function index(Film $film): BaseResponse
     {
-        try {
-            $comments = Comment::where('film_id', $film->id)->simplePaginate();
-            return new SuccessResponse($comments);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $comments = Comment::where('film_id', $film->id)->simplePaginate();
+        return new SuccessResponse($comments);
     }
 
     /**
@@ -39,17 +35,18 @@ class CommentController extends Controller
      */
     public function store(CommentRequest $request, Film $film): BaseResponse
     {
-        try {
 
-            $comment = $film->comments()->create([
-                'text' => $request->input('text'),
-                'rating' => $request->input('rating'),
-                'user_id' => Auth::user()->id,
-            ]);
-            return new SuccessResponse($comment);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $comment = $film->comments()->create([
+            'comment_id' => $request->get('comment_id', null),
+            'text' => $request->input('text'),
+            'rating' => $request->input('rating'),
+            'user_id' => Auth::user()->id,
+        ]);
+
+        $film->rating();
+
+        return new SuccessResponse($comment);
+
     }
 
     /**
@@ -65,15 +62,15 @@ class CommentController extends Controller
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
 
-        try {
-            $comment->update([
-                'text' => $request->input('text'),
-                'rating' => $request->input('rating'),
-            ]);
-            return new SuccessResponse($comment);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $comment->update([
+            'text' => $request->input('text'),
+            'rating' => $request->input('rating'),
+        ]);
+
+        $film = $comment->film;
+        $film->rating();
+
+        return new SuccessResponse($comment);
     }
 
     /**
@@ -88,12 +85,12 @@ class CommentController extends Controller
         if (Auth::user()->cannot('delete', $comment)) {
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
+        $comment->children()->delete();
+        $comment->delete();
 
-        try {
-            $comment->delete();
-            return new SuccessResponse(null, Response::HTTP_NO_CONTENT);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $film = $comment->film;
+        $film->rating();
+        return new SuccessResponse(null, Response::HTTP_NO_CONTENT);
+        
     }
 }

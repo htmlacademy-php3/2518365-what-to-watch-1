@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * @property int $id
@@ -71,13 +72,44 @@ class Film extends Model
     ];
 
     /**
+     * Отношения
+     *
+     * @var array
+     */
+    protected $with = [
+        'actors',
+        'genres',
+    ];
+
+    /**
      * Атрибуты
      *
-     * @var array<string,string>
+     * @var array
      */
     protected $casts = [
         'released' => 'integer',
         'rating' => 'float',
+    ];
+
+    /**
+     * Атрибуты
+     *
+     * @var array
+     */
+    protected $appends = [
+        'starring',
+        'genre',
+        'is_favorite',
+    ];
+
+    /**
+     * Атрибуты
+     *
+     * @var array
+     */
+    protected $hidden = [
+        'actors',
+        'genres',
     ];
 
     /**
@@ -132,6 +164,41 @@ class Film extends Model
 
         $this->rating = $avgRating;
         $this->save();
+    }
+
+    /**
+     * Получает список жанров
+     *
+     * @return array
+     */
+    public function getGenreAttribute(): array
+    {
+        return $this->genres->pluck('name')->toArray();
+    }
+
+    /**
+     * Получает список актеров
+     *
+     * @return array
+     */
+    public function getStarringAttribute(): array
+    {
+        return $this->actors->pluck('name')->toArray();
+    }
+
+    /**
+     * Проверяет избранный фильм для текущего пользователя
+     *
+     * @return bool
+     */
+    public function getIsFavoriteAttribute(): bool
+    {
+
+        if (Auth::user()) {
+            return $this->favoritedByUsers()->where('user_id', Auth::user()->id)->exists();
+        }
+
+        return false;
     }
 
 }

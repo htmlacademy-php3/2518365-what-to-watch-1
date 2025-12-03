@@ -6,7 +6,8 @@ use App\Http\Responses\BaseResponse;
 use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Models\Film;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\Response;
 
 class FavoriteController extends Controller
 {
@@ -17,27 +18,26 @@ class FavoriteController extends Controller
      */
     public function index(): BaseResponse
     {
-        try {
-            return new SuccessResponse();
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $favoriteFilms = Auth::user()->favoriteFilms()->orderBy('created_at', 'desc')->simplePaginate();
+
+        return new SuccessResponse($favoriteFilms);
     }
 
     /**
      * Добавление фильма в избранное
      *
-     * @param Request $request Запрос
      * @param Film $film Объект фильма
      * @return BaseResponse
      */
-    public function store(Request $request, Film $film): BaseResponse
+    public function store(Film $film): BaseResponse
     {
-        try {
-            return new SuccessResponse();
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
+        if (Auth::user()->isFavoriteFilm($film->id)) {
+            return new FailResponse('Фильм уже добавлен в избранное', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        Auth::user()->favoriteFilms()->attach($film);
+
+        return new SuccessResponse();
     }
 
     /**
@@ -48,10 +48,13 @@ class FavoriteController extends Controller
      */
     public function destroy(Film $film): BaseResponse
     {
-        try {
-            return new SuccessResponse();
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
+
+        if (!Auth::user()->isFavoriteFilm($film->id)) {
+            return new FailResponse('Фильм отсутствует в избранном', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
+
+        Auth::user()->favoriteFilms()->detach($film);
+
+        return new SuccessResponse();
     }
 }
