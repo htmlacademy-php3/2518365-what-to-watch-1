@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('film_id');
-            $table->unsignedBigInteger('parent_id')->nullable()->constrained('comments');
+            $table->unsignedBigInteger('comment_id')->nullable()->constrained('comments');
             $table->text('text');
             $table->integer('rating');
             $table->boolean('is_external')->default(0);

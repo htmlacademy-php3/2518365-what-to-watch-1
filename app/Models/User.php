@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -82,5 +81,17 @@ class User extends Authenticatable
     public function isModerator(): bool
     {
         return $this->role === self::ROLE_MODERATOR;
+    }
+
+    /**
+     * Проверяет фильм в избранном у пользователя
+     *
+     * @param int $filmId ID фильма
+     *
+     * @return bool
+     */
+    public function isFavoriteFilm(int $filmId): bool
+    {
+        return $this->favoriteFilms()->where('film_id', $filmId)->exists();
     }
 }

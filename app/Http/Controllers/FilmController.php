@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\FilmRequest;
+use App\Http\Requests\StoreFilmRequest;
+use App\Http\Requests\UpdateFilmRequest;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Models\Film;
-use Illuminate\Http\Request;
+use App\Services\SyncService;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -30,7 +32,7 @@ class FilmController extends Controller
         $order_by = $request->query('order_by', Film::ORDER_BY_RELEASED);
         $order_to = $request->query('order_to', Film::ORDER_TO_DESC);
 
-        if (Auth::user()->cannot('viewWithStatus', [Film::class, $status])) {
+        if (Auth::user() && Auth::user()->cannot('viewWithStatus', [Film::class, $status])) {
             return new FailResponse("Недостаточно прав для просмотра фильмов в статусе $status", Response::HTTP_FORBIDDEN);
         }
 
@@ -51,18 +53,28 @@ class FilmController extends Controller
     /**
      * Добавление фильма в базу
      *
-     * @param Request $request Запрос
+     * @param StoreFilmRequest $request Запрос
      * @return BaseResponse Ответ
      */
-    public function store(Request $request): BaseResponse
+    public function store(StoreFilmRequest $request): BaseResponse
     {
-        if (Auth::user()->cannot('create', Film::class)) {
-            return new FailResponse('Недостаточно прав для создания фильма', Response::HTTP_FORBIDDEN);
+        $imdbId = $request->validated('imdb_id');
+
+        if (Film::where('imdb_id', $imdbId)->exists()) {
+            return new FailResponse('Фильм с таким IMDb ID уже существует', Response::HTTP_CONFLICT);
         }
+
+        $data = [
+            'imdb_id' => $imdbId,
+            'status' => Film::STATUS_PENDING,
+        ];
+
         try {
-            return new SuccessResponse();
+            Film::create($data);
+            return new SuccessResponse($data, Response::HTTP_CREATED);
+
         } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
+            return new FailResponse('Произошла ошибка при создании фильма', Response::HTTP_INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -80,19 +92,22 @@ class FilmController extends Controller
     /**
      * Редактирование фильма
      *
-     * @param Request $request Запрос
+     * @param UpdateFilmRequest $request Запрос
      * @param Film $film Объект фильма
      * @return BaseResponse Ответ
      */
-    public function update(Request $request, Film $film): BaseResponse
+    public function update(UpdateFilmRequest $request, Film $film): BaseResponse
     {
-        if (Auth::user()->cannot('update', $film)) {
-            return new FailResponse('Недостаточно прав для редактирования фильма', Response::HTTP_FORBIDDEN);
+        $film->update($request->validated());
+
+        if ($request->has('starring')) {
+            app(SyncService::class)->syncActors($film, $request->input('starring'));
         }
-        try {
-            return new SuccessResponse($film);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
+
+        if ($request->has('genre')) {
+            app(SyncService::class)->syncGenres($film, $request->input('genre'));
         }
+
+        return new SuccessResponse($film);
     }
 }
