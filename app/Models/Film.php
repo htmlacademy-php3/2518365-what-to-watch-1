@@ -112,6 +112,18 @@ class Film extends Model
         'genres',
     ];
 
+    public static function createFromData(array $data): Film
+    {
+        $film = new self();
+
+        $film->fill($data);
+        $film->status = self::STATUS_PENDING;
+
+        $film->save();
+
+        return $film;
+    }
+
     /**
      * Связь "многие ко многим" к модели Genre
      *

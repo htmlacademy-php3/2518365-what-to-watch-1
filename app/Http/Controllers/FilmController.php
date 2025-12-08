@@ -8,6 +8,7 @@ use App\Http\Requests\UpdateFilmRequest;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
+use App\Jobs\CreateFilmJob;
 use App\Models\Film;
 use App\Services\SyncService;
 use Illuminate\Support\Facades\Auth;
@@ -60,22 +61,15 @@ class FilmController extends Controller
     {
         $imdbId = $request->validated('imdb_id');
 
-        if (Film::where('imdb_id', $imdbId)->exists()) {
-            return new FailResponse('Фильм с таким IMDb ID уже существует', Response::HTTP_CONFLICT);
-        }
-
         $data = [
             'imdb_id' => $imdbId,
             'status' => Film::STATUS_PENDING,
         ];
 
-        try {
-            Film::create($data);
-            return new SuccessResponse($data, Response::HTTP_CREATED);
+        Film::create($data);
+        CreateFilmJob::dispatch($data);
 
-        } catch (\Exception $e) {
-            return new FailResponse('Произошла ошибка при создании фильма', Response::HTTP_INTERNAL_SERVER_ERROR);
-        }
+        return new SuccessResponse($data, Response::HTTP_CREATED);
     }
 
     /**
