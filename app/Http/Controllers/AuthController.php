@@ -21,7 +21,7 @@ class AuthController extends Controller
     public function login(LoginRequest $request): BaseResponse
     {
         try {
-            if (!Auth::attempt($request->validated())) {
+            if (!Auth::guard('web')->attempt($request->validated())) {
                 abort(Response::HTTP_UNAUTHORIZED, trans('auth.failed'));
             }
 

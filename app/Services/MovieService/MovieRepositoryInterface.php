@@ -1,6 +1,6 @@
 <?php
 
-namespace WhatToWatch\Services\MovieService;
+namespace App\Services\MovieService;
 
 interface MovieRepositoryInterface
 {

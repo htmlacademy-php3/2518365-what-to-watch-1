@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'omdb' => [
+        'api_key' => env('OMDB_API_KEY'),
+        'base_url' => env('OMDB_BASE_URL', 'https://www.omdbapi.com/'),
+        'cache_time' => env('OMDB_CACHE_TIME', 3600),
+        'timeout' => env('OMDB_TIMEOUT', 10),
+        'connect_timeout' => env('OMDB_CONNECT_TIMEOUT', 5),
+    ],
 ];
