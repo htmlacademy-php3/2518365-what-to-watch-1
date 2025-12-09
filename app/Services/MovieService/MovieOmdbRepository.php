@@ -2,56 +2,80 @@
 
 namespace App\Services\MovieService;
 
-use GuzzleHttp\Client;
 use App\DTO\FilmData;
-
+use Carbon\Carbon;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
+use Illuminate\Support\Facades\Cache;
+use JsonException;
 
 class MovieOmdbRepository implements MovieRepositoryInterface
 {
-
     private Client $client;
     private string $apiKey;
     private string $baseUrl;
+    private int $cacheTime;
 
-  public function __construct(Client $client)
-  {
-      $this->client = $client;
-      $this->apiKey = config('services.omdb.api_key');
-      $this->baseUrl = config('services.omdb.base_url');
-  }
+    public function __construct(Client $client, array $config)
+    {
+        $this->client = $client;
+        $this->apiKey = $config['api_key'];
+        $this->baseUrl = $config['base_url'];
+        $this->cacheTime = $config['cache_time'];
+    }
 
-  /**
-   * Поиск фильма по его IMDB ID
-   *
-   * @param string $imdbId IMDB ID фильма
-   * @return array|null Возвращает массив с информацией о фильме или null, если фильм не найден
-   */
-  public function findMovieById(string $imdbId): ?array
-  {
-      $response = $this->client->request('GET', $this->baseUrl, [
-          'query' => [
-              'apikey' => $this->apiKey,
-              'i' => $imdbId,
-          ],
-      ]);
+    /**
+     * Поиск фильма по его IMDB ID
+     *
+     * @param string $imdbId IMDB ID фильма
+     * @return array|null Возвращает массив с информацией о фильме или null, если фильм не найден
+     * @throws GuzzleException При ошибках сетевого запроса
+     * @throws JsonException При ошибках парсинга JSON
+     */
+    public function findMovieById(string $imdbId): ?array
+    {
+        $cacheKey = 'movie_' . $imdbId;
 
-      $movieData = json_decode($response->getBody()->getContents(), true);
+        if (Cache::has($cacheKey)) {
+            return Cache::get($cacheKey);
+        }
 
-      $filmData = new FilmData(
-          $movieData['Title'],
-          $movieData['Plot'],
-          $movieData['Director'],
-          (int) $movieData['Year'],
-          (int) $movieData['Runtime'],
-          $movieData['imdbID'],
-          array_map('trim', explode(',', $movieData['Actors'])),
-          array_map('trim', explode(',', $movieData['Genre']))
-      );
+        $response = $this->client->request('GET', $this->baseUrl, [
+            'query' => [
+                'apikey' => $this->apiKey,
+                'i' => $imdbId,
+            ],
+        ]);
 
-      $filmData->poster_image = $movieData['Poster'];
-      $filmData->rating = (float) $movieData['imdbRating'];
-      $filmData->scores_count = (int) str_replace(',', '', $movieData['imdbVotes']);
+        if ($response->getStatusCode() < 200 || $response->getStatusCode() >= 300) {
+            return null;
+        }
 
-      return $filmData->toArray();
-  }
+        $movieData = $response->json();
+
+        if (($movieData['Response'] ?? 'False') === 'False') {
+            return null;
+        }
+
+        $filmData = new FilmData(
+            $movieData['Title'] ?? null,
+            $movieData['Plot'] ?? null,
+            $movieData['Director'] ?? null,
+            (int)($movieData['Year'] ?? 0),
+            (int)($movieData['Runtime'] ?? 0),
+            $movieData['imdbID'] ?? null,
+            array_map('trim', explode(',', $movieData['Actors'] ?? '')),
+            array_map('trim', explode(',', $movieData['Genre'] ?? ''))
+        );
+
+        $filmData->poster_image = $movieData['Poster'] ?? null;
+        $filmData->rating = (float)($movieData['imdbRating'] ?? 0);
+        $filmData->scores_count = (int)str_replace(',', '', $movieData['imdbVotes'] ?? '0');
+
+        $data = $filmData->toArray();
+        $cacheTimeCarbon = Carbon::now()->addSeconds($this->cacheTime);
+        Cache::put($cacheKey, $data, $cacheTimeCarbon);
+
+        return $data;
+    }
 }
