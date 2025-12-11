@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('films', function (Blueprint $table) {
             $table->id();
-            $table->string('name')->nullable();
+            $table->string('name')->nullable(false);
             $table->string('poster_image')->nullable();
             $table->string('preview_image')->nullable();
             $table->string('background_image')->nullable();

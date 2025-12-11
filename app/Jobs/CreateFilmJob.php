@@ -3,6 +3,7 @@
 namespace App\Jobs;
 
 use App\Models\Film;
+use App\Services\FilmService;
 use App\Services\MovieService\MovieService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -20,19 +21,22 @@ class CreateFilmJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(private readonly string $imdbId)
+    public function __construct(public array $data)
     {
     }
 
     /**
      * Execute the job.
      */
-    public function handle(MovieService $movieService): void
+    public function handle(MovieService $movieService, FilmService $filmService)
     {
-        $movieData = $movieService->getMovie($this->imdbId);
+        $imdbId = $this->data['imdb_id'];
 
-        if ($movieData) {
-            Film::createFromData($movieData);
+        $movieData = $movieService->getMovie($imdbId);
+
+        if (!$movieData) {
+            $filmService->deleteFilm($imdbId);
         }
+        $filmService->updateFromData($movieData, Film::STATUS_MODERATE);
     }
 }
