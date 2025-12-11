@@ -10,7 +10,8 @@ use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Jobs\CreateFilmJob;
 use App\Models\Film;
-use App\Services\SyncService;
+use App\Services\ActorService;
+use App\Services\GenreService;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -95,11 +96,11 @@ class FilmController extends Controller
         $film->update($request->validated());
 
         if ($request->has('starring')) {
-            app(SyncService::class)->syncActors($film, $request->input('starring'));
+            app(ActorService::class)->syncActors($film, $request->input('starring'));
         }
 
         if ($request->has('genre')) {
-            app(SyncService::class)->syncGenres($film, $request->input('genre'));
+            app(GenreService::class)->syncGenres($film, $request->input('genre'));
         }
 
         return new SuccessResponse($film);
