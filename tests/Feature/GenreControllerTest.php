@@ -13,9 +13,7 @@ class GenreControllerTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Тест получения списка жанров.
-     *
-     * @return void
+     * Тест метода index, который возвращает список жанров.
      */
     public function testIndex(): void
     {
@@ -24,83 +22,104 @@ class GenreControllerTest extends TestCase
         $response = $this->getJson('/api/genres');
 
         $response->assertStatus(Response::HTTP_OK);
-
-        $responseData = $response->json();
-        $this->assertIsArray($responseData);
-
-        if (isset($responseData['data'])) {
-            $data = $responseData['data'];
-            $this->assertIsArray($data);
-            $this->assertCount(3, $data);
-
-            if (count($data) > 0) {
-                $firstGenre = $data[0];
-                $this->assertArrayHasKey('id', $firstGenre);
-                $this->assertArrayHasKey('name', $firstGenre);
-            }
-        }
+        $response->assertJsonStructure([
+            'data' => [
+                '*' => [
+                    'id',
+                    'name',
+                ],
+            ],
+        ]);
     }
 
     /**
-     * Тест обновления жанра неавторизованным пользователем.
-     *
-     * @return void
+     * Тест метода update без авторизации.
      */
     public function testUpdateUnauthorized(): void
     {
         $genre = Genre::factory()->create();
-        $newName = 'Новый жанр';
+        $newGenre = 'newGenre';
 
         $response = $this->patchJson("/api/genres/{$genre->id}", [
-            'name' => $newName,
+            'name' => $newGenre,
         ]);
 
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+        $response->assertJson([
+            'message' => 'Запрос требует аутентификации',
+        ]);
     }
 
+    /**
+     * Тест метода update при авторизации без прав модератора.
+     */
+    public function testUpdateAuthorized(): void
+    {
+        $genre = Genre::factory()->create();
+        $user = User::factory()->create(['role' => User::ROLE_USER]);
+        $newGenre = 'newGenre';
+
+        $response = $this->actingAs($user)
+            ->patchJson("/api/genres/{$genre->id}", [
+                'name' => $newGenre,
+            ]);
+
+        $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertJson([
+            'message' => 'Недостаточно прав',
+        ]);
+    }
 
     /**
-     * Тест обновления жанра модератором.
-     *
-     * @return void
+     * Тест метода update при авторизации с правами модератора.
      */
     public function testUpdateModerator(): void
     {
         $genre = Genre::factory()->create();
         $user = User::factory()->create(['role' => User::ROLE_MODERATOR]);
-        $newName = 'Новый жанр';
+        $newGenre = 'newGenre';
 
         $response = $this->actingAs($user)
             ->patchJson("/api/genres/{$genre->id}", [
-                'name' => $newName,
+                'name' => $newGenre,
             ]);
 
-        $response->assertSuccessful();
-
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJson([
+            'data' => [
+                'id' => $genre->id,
+                'name' => $newGenre,
+            ],
+        ]);
 
         $this->assertDatabaseHas('genres', [
             'id' => $genre->id,
-            'name' => $newName,
+            'name' => $newGenre,
         ]);
     }
 
     /**
      * Тест валидации при обновлении жанра.
-     *
-     * @return void
      */
     public function testUpdateValidationError(): void
     {
         $genre = Genre::factory()->create();
         $user = User::factory()->create(['role' => User::ROLE_MODERATOR]);
-        $newName = '';
+        $newGenre = '';
 
         $response = $this->actingAs($user)
             ->patchJson("/api/genres/{$genre->id}", [
-                'name' => $newName,
+                'name' => $newGenre,
             ]);
 
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJsonValidationErrors(['name']);
+        $response->assertJson([
+            'message' => 'Переданные данные не корректны',
+            'errors' => [
+                'name' => [
+                    'Поле Название обязательно для заполнения',
+                ],
+            ],
+        ]);
     }
 }

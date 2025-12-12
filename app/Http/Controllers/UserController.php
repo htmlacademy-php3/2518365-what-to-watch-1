@@ -2,43 +2,62 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateUserRequest;
 use App\Http\Responses\BaseResponse;
-use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 
 class UserController extends Controller
 {
     /**
-     * Получение профиля пользователя
+     * Получение профиля пользователя.
      *
-     * @return BaseResponse Ответ
+     * @return BaseResponse Ответ.
      */
     public function show(): BaseResponse
     {
-        try {
-            $user = Auth::user();
-            return new SuccessResponse([
-                'user' => $user,
-            ]);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        $user = Auth::user();
+        return new SuccessResponse([
+            'user' => $user,
+        ]);
     }
 
     /**
-     * Обновление профиля пользователя
+     * Обновление профиля пользователя.
      *
-     * @param Request $request Запрос
-     * @return BaseResponse Ответ
+     * @param UpdateUserRequest $request Запрос.
+     * @return BaseResponse Ответ.
      */
-    public function update(Request $request): BaseResponse
+    public function update(UpdateUserRequest $request): BaseResponse
     {
-        try {
-            return new SuccessResponse();
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
+        $user = Auth::user();
+        $data = [
+            'email' => $request->input('email'),
+            'name' => $request->input('name'),
+        ];
+
+        if ($request->has('password')) {
+            $data['password'] = Hash::make($request->input('password'));
         }
+
+        $oldAvatar = null;
+        if ($request->hasFile('avatar')) {
+            $newAvatar = $request->file('avatar');
+            $oldAvatar = $user->avatar;
+            $filename = $newAvatar->store('public/avatars', 'local');
+            $data['avatar'] = $filename;
+        }
+
+        $user->update($data);
+
+        if ($oldAvatar) {
+            Storage::delete($oldAvatar);
+        }
+
+        return new SuccessResponse([
+            'user' => $user,
+        ]);
     }
 }

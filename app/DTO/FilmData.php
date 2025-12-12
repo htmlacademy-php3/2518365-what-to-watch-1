@@ -13,34 +13,52 @@ class FilmData
     public ?string $preview_video_link = null;
     public string $description;
     public string $director;
-    public int $released;
-    public int $run_time;
-    public string $imdb_id;
     public array $starring;
     public array $genre;
+    public int $run_time;
+    public int $released;
+    public string $imdb_id;
     public ?float $rating = null;
     public ?int $scores_count = null;
 
+    /**
+     * Конструктор класса FilmData.
+     *
+     * @param string $name Название фильма.
+     * @param string $description Описание фильма.
+     * @param string $director Режиссер фильма.
+     * @param array $starring Актеры фильма.
+     * @param array $genre Жанры фильма.
+     * @param int $run_time Длительность фильма.
+     * @param int $released Год выпуска фильма.
+     * @param string $imdb_id ID фильма в IMDB.
+     */
     public function __construct(
         string $name,
         string $description,
         string $director,
-        int $released,
-        int $run_time,
+        array  $starring,
+        array  $genre,
+        int    $run_time,
+        int    $released,
         string $imdb_id,
-        array $starring,
-        array $genre
-    ) {
+    )
+    {
         $this->name = $name;
         $this->description = $description;
         $this->director = $director;
-        $this->released = $released;
-        $this->run_time = $run_time;
-        $this->imdb_id = $imdb_id;
         $this->starring = $starring;
         $this->genre = $genre;
+        $this->run_time = $run_time;
+        $this->released = $released;
+        $this->imdb_id = $imdb_id;
     }
 
+    /**
+     * Преобразование объекта FilmData в массив.
+     *
+     * @return array Массив с данными фильма.
+     */
     public function toArray(): array
     {
         return [
@@ -53,11 +71,11 @@ class FilmData
             'preview_video_link' => $this->preview_video_link,
             'description' => $this->description,
             'director' => $this->director,
-            'released' => $this->released,
-            'run_time' => $this->run_time,
-            'imdb_id' => $this->imdb_id,
             'starring' => $this->starring,
             'genre' => $this->genre,
+            'run_time' => $this->run_time,
+            'released' => $this->released,
+            'imdb_id' => $this->imdb_id,
             'rating' => $this->rating,
             'scores_count' => $this->scores_count,
         ];

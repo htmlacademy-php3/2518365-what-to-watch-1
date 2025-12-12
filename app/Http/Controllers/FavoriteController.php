@@ -12,9 +12,9 @@ use Symfony\Component\HttpFoundation\Response;
 class FavoriteController extends Controller
 {
     /**
-     * Получение списка фильмов добавленных пользователем в избранное
+     * Получение списка фильмов добавленных пользователем в избранное.
      *
-     * @return BaseResponse
+     * @return BaseResponse Ответ.
      */
     public function index(): BaseResponse
     {
@@ -24,10 +24,10 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Добавление фильма в избранное
+     * Добавление фильма в избранное.
      *
-     * @param Film $film Объект фильма
-     * @return BaseResponse
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function store(Film $film): BaseResponse
     {
@@ -41,10 +41,10 @@ class FavoriteController extends Controller
     }
 
     /**
-     * Удаление фильма из избранного
+     * Удаление фильма из избранного.
      *
-     * @param Film $film Объект фильма
-     * @return BaseResponse
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function destroy(Film $film): BaseResponse
     {

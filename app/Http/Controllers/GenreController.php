@@ -10,22 +10,22 @@ use App\Models\Genre;
 class GenreController extends Controller
 {
     /**
-     * Получение списка жанров
+     * Получение списка жанров.
      *
-     * @return BaseResponse
+     * @return BaseResponse Ответ.
      */
     public function index(): BaseResponse
     {
-        $genres = Genre::paginate();
+        $genres = Genre::all();
         return new SuccessResponse($genres);
     }
 
     /**
-     * Редактирование жанра
+     * Редактирование жанра.
      *
-     * @param GenreRequest $request Запрос
-     * @param Genre $genre Объект жанра
-     * @return BaseResponse Ответ
+     * @param GenreRequest $request Запрос.
+     * @param Genre $genre Объект жанра.
+     * @return BaseResponse Ответ.
      */
     public function update(GenreRequest $request, Genre $genre): BaseResponse
     {

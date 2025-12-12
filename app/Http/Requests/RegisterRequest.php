@@ -2,11 +2,9 @@
 
 namespace App\Http\Requests;
 
-use App\Models\Film;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
-class StoreFilmRequest extends FormRequest
+class RegisterRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,12 +24,10 @@ class StoreFilmRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'imdb_id' => [
-                'required',
-                'string',
-                Rule::unique(Film::class),
-                'regex:/^tt\d{7,}$/i',
-            ],
+            'email' => 'required|email|unique:users,email',
+            'password' => 'required|string|min:8',
+            'name' => 'required|string|max:255',
+            'avatar' => 'nullable|file|image|max:10240',
         ];
     }
 }

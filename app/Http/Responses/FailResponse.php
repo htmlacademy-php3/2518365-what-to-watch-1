@@ -22,7 +22,7 @@ class FailResponse extends BaseResponse
     }
 
     /**
-     * Формирование содержимого ответа
+     * Формирование содержимого ответа с ошибкой.
      *
      * @return array|null
      */

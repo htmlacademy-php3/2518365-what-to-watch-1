@@ -27,8 +27,12 @@ class CreateFilmJob implements ShouldQueue
 
     /**
      * Execute the job.
+     *
+     * @param MovieService $movieService
+     * @param FilmService $filmService
+     * @return void
      */
-    public function handle(MovieService $movieService, FilmService $filmService)
+    public function handle(MovieService $movieService, FilmService $filmService): void
     {
         $imdbId = $this->data['imdb_id'];
 
@@ -36,6 +40,7 @@ class CreateFilmJob implements ShouldQueue
 
         if (!$movieData) {
             $filmService->deleteFilm($imdbId);
+            return;
         }
         $filmService->updateFromData($movieData, Film::STATUS_MODERATE);
     }

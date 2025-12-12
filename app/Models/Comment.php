@@ -10,32 +10,33 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * @property int $id
- * @property int $user_id
- * @property int $film_id
- * @property int|null $comment_id
- * @property string $text
- * @property int|null $rating
- * @property bool $is_external
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property int $id Идентификатор комментария
+ * @property int $user_id Идентификатор пользователя
+ * @property int $film_id Идентификатор фильма
+ * @property int|null $comment_id Идентификатор родительского комментария
+ * @property string $text Текст комментария
+ * @property int|null $rating Рейтинг
+ * @property bool $is_external Внешний ли комментарий
+ * @property Carbon $created_at Дата создания
+ * @property Carbon $updated_at Дата обновления
  *
- * @property User $user
- * @property Film $film
- * @property Comment|null $parent
- * @property Collection|Comment[] $children
+ * @property-read User|null $user Автор комментария
+ * @property-read Film $film Фильм
+ * @property-read Comment|null $parent Родительский комментарий
+ * @property-read Collection<int, Comment> $children Дочерние комментарии
+ * @property-read int|null $children_count Количество дочерних комментариев
+ * @property-read string $author_name Имя автора
  */
 class Comment extends Model
 {
-    /** @use HasFactory<\Database\Factories\CommentFactory> */
     use HasFactory;
 
-    public const string ANONYMOUS_USER = 'Анонимный пользователь';
+    public const string ANONYMOUS_USER = 'Гость';
 
     /**
-     * Атрибуты
+     * Атрибуты, которые можно массово назначать.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = [
         'user_id',
@@ -47,16 +48,16 @@ class Comment extends Model
     ];
 
     /**
-     * Дополнительные атрибуты
+     * Вычисляемые атрибуты.
      *
-     * @var string[]
+     * @var array<string>
      */
     protected $appends = [
         'author_name',
     ];
 
     /**
-     * Связь "один ко многим" к модели User
+     * Связь "один ко многим" к модели User.
      *
      * @return BelongsTo
      */
@@ -66,7 +67,7 @@ class Comment extends Model
     }
 
     /**
-     * Связь "один ко многим" к модели Film
+     * Связь "один ко многим" к модели Film.
      *
      * @return BelongsTo
      */
@@ -76,7 +77,7 @@ class Comment extends Model
     }
 
     /**
-     * Связь "многие к одному" к модели Comment (родительский комментарий)
+     * Связь "многие к одному" к модели Comment (родительский комментарий).
      *
      * @return BelongsTo
      */
@@ -86,7 +87,7 @@ class Comment extends Model
     }
 
     /**
-     * Связь "один ко многим" к модели Comment (дочерние комментарии)
+     * Связь "один ко многим" к модели Comment (дочерние комментарии).
      *
      * @return HasMany
      */
@@ -96,17 +97,17 @@ class Comment extends Model
     }
 
     /**
-     * Проверка на дочерние комментарии
+     * Проверка на дочерние комментарии.
      *
      * @return bool
      */
-    public function isHaveChildren(): bool
+    public function isNotHaveChildren(): bool
     {
         return $this->children()->count() === 0;
     }
 
     /**
-     * Получает имя автора
+     * Получает имя автора комментария.
      *
      * @return string
      */
@@ -116,6 +117,18 @@ class Comment extends Model
             return self::ANONYMOUS_USER;
         }
 
-        return $this->user->name ?? self::ANONYMOUS_USER;
+        return $this->user->name;
+    }
+
+    /**
+     * Получает дату последнего внешнего комментария.
+     *
+     * @return Carbon|null
+     */
+    public static function getLastExternalCommentDate(): ?Carbon
+    {
+        $lastCommentDate = self::where('is_external', true)->max('created_at');
+
+        return $lastCommentDate ? Carbon::parse($lastCommentDate) : null;
     }
 }

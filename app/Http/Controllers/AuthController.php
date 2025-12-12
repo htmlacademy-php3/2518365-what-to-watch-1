@@ -13,42 +13,35 @@ use Symfony\Component\HttpFoundation\Response;
 class AuthController extends Controller
 {
     /**
-     * Аутентификация
+     * Авторизация пользователя.
      *
-     * @param LoginRequest $request Запрос
-     * @return BaseResponse Ответ
+     * @param LoginRequest $request Запрос.
+     * @return BaseResponse Ответ.
      */
     public function login(LoginRequest $request): BaseResponse
     {
-        try {
-            if (!Auth::guard('web')->attempt($request->validated())) {
-                abort(Response::HTTP_UNAUTHORIZED, trans('auth.failed'));
-            }
-
-            $request->session()->regenerate();
-            $token = Auth::user()->createToken('auth_token')->plainTextToken;
-
-            return new SuccessResponse([
-                'token' => $token,
-            ]);
-        } catch (\Exception$e) {
-            return new FailResponse(null, null, $e);
+        if (!Auth::guard('web')->attempt($request->validated())) {
+            return new FailResponse(trans('auth.failed'), Response::HTTP_UNAUTHORIZED);
         }
+
+        $request->session()->regenerate();
+        $token = Auth::user()->createToken('auth_token')->plainTextToken;
+
+        return new SuccessResponse([
+            'token' => $token,
+        ]);
     }
 
     /**
-     * Выход
+     * Выход пользователя.
      *
-     * @return BaseResponse Ответ
+     * @return BaseResponse Ответ.
      */
     public function logout(Request $request): BaseResponse
     {
-        try {
-            Auth::user()->tokens()->delete();
-            $request->session()->invalidate();
-            return new SuccessResponse(null, Response::HTTP_NO_CONTENT);
-        } catch (\Exception $e) {
-            return new FailResponse(null, null, $e);
-        }
+        Auth::user()->tokens()->delete();
+        $request->session()->invalidate();
+
+        return new SuccessResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

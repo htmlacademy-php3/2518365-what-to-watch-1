@@ -12,7 +12,11 @@ class CommentPolicy
      */
     public function update(User $user, Comment $comment): bool
     {
-        return $user->isModerator() || $user->id === $comment->user_id;
+        if ($user->isModerator()) {
+            return true;
+        }
+
+        return $user->id === $comment->user_id;
     }
 
     /**
@@ -24,6 +28,6 @@ class CommentPolicy
             return true;
         }
 
-        return $user->id === $comment->user_id && $comment->isHaveChildren();
+        return $user->id === $comment->user_id && $comment->isNotHaveChildren();
     }
 }

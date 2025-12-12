@@ -12,7 +12,7 @@ class CommentTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Тест получения имени автора комментария
+     * Тест получения имени автора комментария.
      */
 
     public function testAuthorName(): void
@@ -26,7 +26,7 @@ class CommentTest extends TestCase
     }
 
     /**
-     * Тест получения имени анонимного автора комментария
+     * Тест получения имени анонимного автора комментария.
      */
 
     public function testAnonymousAuthorName(): void

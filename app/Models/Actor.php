@@ -9,29 +9,28 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 
 /**
- * @property int $id
- * @property string $name
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property int $id Идентификатор актера
+ * @property string $name Имя актера
+ * @property Carbon $created_at Дата создания
+ * @property Carbon $updated_at Дата обновления
  *
- * @property Collection|Film[] $films
+ * @property-read Collection<int, Film> $films Фильмы с участием актера
  */
 class Actor extends Model
 {
-    /** @use HasFactory<\Database\Factories\ActorFactory> */
     use HasFactory;
 
     /**
-     * Атрибуты
+     * Атрибуты, которые можно массово назначать.
      *
-     * @var string[]
+     * @var array<string>
      */
     protected $fillable = [
         'name',
     ];
 
     /**
-     * Связь "многие ко многим" к модели Film
+     * Связь "многие ко многим" к модели Film.
      *
      * @return BelongsToMany
      */

@@ -17,6 +17,10 @@ class FilmJobTest extends TestCase
 {
     use RefreshDatabase;
 
+    /**
+     * Тест задачи CreateFilmJob.
+     */
+
     public function testCreateFilmJob()
     {
         $imdbId = 'tt0944947';

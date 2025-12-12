@@ -9,6 +9,8 @@ class FilmRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -37,8 +39,8 @@ class FilmRequest extends FormRequest
                     Film::ORDER_BY_RATING
                 ]),
             'order_to' => 'nullable|string|in:' . implode(',', [
-                    Film::ORDER_TO_ASC,
-                    Film::ORDER_TO_DESC
+                    Film::ORDER_ASC,
+                    Film::ORDER_DESC
                 ]),
         ];
     }
