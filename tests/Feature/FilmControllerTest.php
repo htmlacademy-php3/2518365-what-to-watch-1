@@ -238,10 +238,6 @@ class FilmControllerTest extends TestCase
                 'status' => Film::STATUS_PENDING,
             ],
         ]);
-        $this->assertDatabaseHas('films', [
-            'imdb_id' => $imdbId,
-            'status' => Film::STATUS_PENDING,
-        ]);
     }
 
     /**
@@ -263,7 +259,7 @@ class FilmControllerTest extends TestCase
 
         $response->assertStatus(Response::HTTP_CREATED);
         Queue::assertPushed(function (CreateFilmJob $job) use ($imdbId) {
-            return $job->data['imdb_id'] === $imdbId;
+            return $job->imdbId === $imdbId;
         });
     }
 

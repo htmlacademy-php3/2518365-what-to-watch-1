@@ -21,7 +21,7 @@ class CreateFilmJob implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public array $data)
+    public function __construct(public string $imdbId)
     {
     }
 
@@ -34,12 +34,11 @@ class CreateFilmJob implements ShouldQueue
      */
     public function handle(MovieService $movieService, FilmService $filmService): void
     {
-        $imdbId = $this->data['imdb_id'];
 
-        $movieData = $movieService->getMovie($imdbId);
+        $movieData = $movieService->getMovie($this->imdbId);
 
         if (!$movieData) {
-            $filmService->deleteFilm($imdbId);
+            $filmService->deleteFilm($this->imdbId);
             return;
         }
         $filmService->updateFromData($movieData, Film::STATUS_MODERATE);

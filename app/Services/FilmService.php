@@ -12,7 +12,8 @@ final readonly class FilmService
      * @param ActorService $actorService Сервис для работы с актерами
      * @param GenreService $genreService Сервис для работы с жанрами
      */
-    public function __construct(private ActorService $actorService, private GenreService $genreService) {
+    public function __construct(private ActorService $actorService, private GenreService $genreService)
+    {
     }
 
     /**
@@ -33,7 +34,7 @@ final readonly class FilmService
     }
 
     /**
-     * Обновляет фильм на основе данных
+     * Обновляет фильм на основе данных или создает, если его не существует.
      *
      * @param array $data Данные фильма
      * @param string $nextStatus Следующий статус фильма
@@ -41,13 +42,13 @@ final readonly class FilmService
      */
     public function updateFromData(array $data, string $nextStatus): ?Film
     {
-        $film = Film::firstWhere('imdb_id', $data['imdb_id']);
-        if ($film) {
-            $this->saveFilm($film, $data, $nextStatus);
-            return $film;
-        } else {
+        $film = Film::updateOrCreate(['imdb_id' => $data['imdb_id']] ?? null, $data);
+        if (!$film) {
             return null;
         }
+
+        $this->saveFilm($film, $data, $nextStatus);
+        return $film;
     }
 
     /**
