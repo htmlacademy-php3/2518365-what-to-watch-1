@@ -7,15 +7,18 @@ use App\Http\Responses\SuccessResponse;
 use App\Models\Film;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class SimilarController extends Controller
 {
     private const int SIMILAR_FILMS_COUNT = 4;
 
     /**
-     * Получение списка похожих фильмов
+     * Получение списка похожих фильмов.
      *
-     * @param Film $film Объект фильма
-     * @return BaseResponse Ответ
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function index(Film $film): BaseResponse
     {

@@ -37,7 +37,9 @@ class MovieOmdbRepository implements MovieRepositoryInterface
         $cacheKey = 'movie_' . $imdbId;
 
         if (Cache::has($cacheKey)) {
-            return Cache::get($cacheKey);
+            /** @var array|null $cachedData */
+            $cachedData = Cache::get($cacheKey);
+            return $cachedData;
         }
 
         $response = $this->client->request('GET', $this->baseUrl, [
@@ -51,21 +53,25 @@ class MovieOmdbRepository implements MovieRepositoryInterface
             return null;
         }
 
-        $movieData = $response->json();
+        /** @psalm-suppress UndefinedInterfaceMethod */
+        $movieData = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
 
         if (($movieData['Response'] ?? 'False') === 'False') {
             return null;
         }
 
+        $actors = $this->parseCommaSeparatedList($movieData['Actors'] ?? '');
+        $genres = $this->parseCommaSeparatedList($movieData['Genre'] ?? '');
+
         $filmData = new FilmData(
-            $movieData['Title'] ?? null,
-            $movieData['Plot'] ?? null,
-            $movieData['Director'] ?? null,
-            (int)($movieData['Year'] ?? 0),
-            (int)($movieData['Runtime'] ?? 0),
-            $movieData['imdbID'] ?? null,
-            array_map('trim', explode(',', $movieData['Actors'] ?? '')),
-            array_map('trim', explode(',', $movieData['Genre'] ?? ''))
+            $movieData['Title'] ?? '', // string - обязательно
+            $movieData['Plot'] ?? '', // string - обязательно
+            $movieData['Director'] ?? '', // string - обязательно
+            $actors, // array - OK
+            $genres, // array - OK
+            $this->parseRuntime($movieData['Runtime'] ?? '0'), // int - OK
+            (int)($movieData['Year'] ?? 0), // int - OK
+            $movieData['imdbID'] ?? '' // string - обязательно
         );
 
         $filmData->poster_image = $movieData['Poster'] ?? null;
@@ -77,5 +83,36 @@ class MovieOmdbRepository implements MovieRepositoryInterface
         Cache::put($cacheKey, $data, $cacheTimeCarbon);
 
         return $data;
+    }
+
+    /**
+     * Парсит строку с разделителями-запятыми в массив.
+     *
+     * @param string $list
+     * @return array<int, string>
+     */
+    private function parseCommaSeparatedList(string $list): array
+    {
+        if (empty($list)) {
+            return [];
+        }
+
+        $items = array_map('trim', explode(',', $list));
+        return array_filter($items, static fn ($item) => $item !== '');
+    }
+
+    /**
+     * Парсит строку времени выполнения в минуты.
+     *
+     * @param string $runtime
+     * @return int
+     */
+    private function parseRuntime(string $runtime): int
+    {
+        if (preg_match('/(\d+)/', $runtime, $matches)) {
+            return (int)$matches[1];
+        }
+
+        return 0;
     }
 }

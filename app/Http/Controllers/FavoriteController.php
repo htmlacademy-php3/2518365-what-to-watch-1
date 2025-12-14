@@ -9,51 +9,67 @@ use App\Models\Film;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class FavoriteController extends Controller
 {
     /**
-     * Получение списка фильмов добавленных пользователем в избранное
+     * Получение списка фильмов добавленных пользователем в избранное.
      *
-     * @return BaseResponse
+     * @return BaseResponse Ответ.
      */
     public function index(): BaseResponse
     {
-        $favoriteFilms = Auth::user()->favoriteFilms()->orderBy('created_at', 'desc')->simplePaginate();
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        /** @psalm-suppress UndefinedMethod */
+        $favoriteFilms = $user->favoriteFilms()->orderBy('created_at', 'desc')->simplePaginate();
 
         return new SuccessResponse($favoriteFilms);
     }
 
     /**
-     * Добавление фильма в избранное
+     * Добавление фильма в избранное.
      *
-     * @param Film $film Объект фильма
-     * @return BaseResponse
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function store(Film $film): BaseResponse
     {
-        if (Auth::user()->isFavoriteFilm($film->id)) {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
+
+        /** @psalm-suppress UndefinedMethod */
+        if ($user->isFavoriteFilm($film->id)) {
             return new FailResponse('Фильм уже добавлен в избранное', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        Auth::user()->favoriteFilms()->attach($film);
+        /** @psalm-suppress UndefinedMethod */
+        $user->favoriteFilms()->attach($film);
 
         return new SuccessResponse();
     }
 
     /**
-     * Удаление фильма из избранного
+     * Удаление фильма из избранного.
      *
-     * @param Film $film Объект фильма
-     * @return BaseResponse
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function destroy(Film $film): BaseResponse
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
-        if (!Auth::user()->isFavoriteFilm($film->id)) {
+        /** @psalm-suppress UndefinedMethod */
+        if (!$user->isFavoriteFilm($film->id)) {
             return new FailResponse('Фильм отсутствует в избранном', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
-        Auth::user()->favoriteFilms()->detach($film);
+        /** @psalm-suppress UndefinedMethod */
+        $user->favoriteFilms()->detach($film);
 
         return new SuccessResponse();
     }

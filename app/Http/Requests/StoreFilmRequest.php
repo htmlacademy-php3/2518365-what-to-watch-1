@@ -6,10 +6,13 @@ use App\Models\Film;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/** @psalm-suppress PossiblyUnusedMethod */
 class StoreFilmRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {

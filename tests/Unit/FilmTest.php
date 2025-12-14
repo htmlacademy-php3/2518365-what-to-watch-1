@@ -15,7 +15,7 @@ class FilmTest extends TestCase
     private const int USERS_COUNT = 5;
 
     /**
-     * Тест получения рейтинга фильма
+     * Тест получения рейтинга фильма.
      */
 
     public function testFilmRating(): void

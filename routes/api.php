@@ -51,7 +51,7 @@ Route::prefix('/films')->group(function () {
 
 Route::prefix('/genres')->group(function () {
     Route::get('/', [GenreController::class, 'index']);
-    Route::patch('/{genre}', [GenreController::class, 'update'])->middleware('auth:sanctum');
+    Route::patch('/{genre}', [GenreController::class, 'update'])->middleware(['auth:sanctum', 'moderator']);
 });
 
 Route::prefix('/comments')->middleware('auth:sanctum')->group(function () {

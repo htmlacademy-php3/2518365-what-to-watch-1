@@ -12,13 +12,16 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class CommentController extends Controller
 {
     /**
-     * Получение отзывов к фильму
+     * Получение отзывов к фильму.
      *
-     * @param Film $film Объект фильма
-     * @return BaseResponse Ответ
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function index(Film $film): BaseResponse
     {
@@ -27,38 +30,44 @@ class CommentController extends Controller
     }
 
     /**
-     * Добавление отзыва к фильму
+     * Добавление отзыва к фильму.
      *
-     * @param CommentRequest $request Запрос
-     * @param Film $film Объект фильма
-     * @return BaseResponse Ответ
+     * @param CommentRequest $request Запрос.
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function store(CommentRequest $request, Film $film): BaseResponse
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         $comment = $film->comments()->create([
             'comment_id' => $request->get('comment_id', null),
             'text' => $request->input('text'),
             'rating' => $request->input('rating'),
-            'user_id' => Auth::user()->id,
+            'user_id' => $user->id,
         ]);
 
+        /** @psalm-suppress UndefinedMethod */
         $film->rating();
 
         return new SuccessResponse($comment);
-
     }
 
     /**
-     * Редактирование отзыва к фильму
+     * Редактирование отзыва к фильму.
      *
-     * @param CommentRequest $request Запрос
-     * @param Comment $comment Объект отзыва
-     * @return BaseResponse Ответ
+     * @param CommentRequest $request Запрос.
+     * @param Comment $comment Объект отзыва.
+     * @return BaseResponse Ответ.
      */
     public function update(CommentRequest $request, Comment $comment): BaseResponse
     {
-        if (Auth::user()->cannot('update', $comment)) {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        /** @psalm-suppress UndefinedMethod */
+        if ($user && $user->cannot('update', $comment)) {
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
 
@@ -68,29 +77,35 @@ class CommentController extends Controller
         ]);
 
         $film = $comment->film;
+        /** @psalm-suppress UndefinedMethod */
         $film->rating();
 
         return new SuccessResponse($comment);
     }
 
     /**
-     * Удаление отзыва к фильму
+     * Удаление отзыва к фильму.
      *
-     * @param Request $request Запрос
-     * @param Comment $comment Объект отзыва
-     * @return BaseResponse Ответ
+     * @param Request $request Запрос.
+     * @psalm-suppress PossiblyUnusedParam
      */
     public function destroy(Request $request, Comment $comment): BaseResponse
     {
-        if (Auth::user()->cannot('delete', $comment)) {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
+
+        /** @psalm-suppress UndefinedMethod */
+        if ($user && $user->cannot('delete', $comment)) {
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
+
         $comment->children()->delete();
         $comment->delete();
 
         $film = $comment->film;
+        /** @psalm-suppress UndefinedMethod */
         $film->rating();
+
         return new SuccessResponse(null, Response::HTTP_NO_CONTENT);
-        
     }
 }

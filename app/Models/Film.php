@@ -11,29 +11,34 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 /**
- * @property int $id
- * @property string $name
- * @property string|null $poster_image
- * @property string|null $preview_image
- * @property string|null $background_image
- * @property string|null $background_color
- * @property string|null $video_link
- * @property string|null $preview_video_link
- * @property string|null $description
- * @property string|null $director
- * @property int|null $released
- * @property string|null $run_time
- * @property float|null $rating
- * @property int|null $scores_count
- * @property string|null $imdb_id
- * @property string|null $status
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property int $id Идентификатор
+ * @property string $name Название фильма
+ * @property string|null $poster_image Постер
+ * @property string|null $preview_image Превью изображение
+ * @property string|null $background_image Фоновое изображение
+ * @property string|null $background_color Цвет фона
+ * @property string|null $video_link Ссылка на видео
+ * @property string|null $preview_video_link Ссылка на превью видео
+ * @property string|null $description Описание
+ * @property string|null $director Режиссер
+ * @property int|null $released Год выпуска
+ * @property string|null $run_time Продолжительность
+ * @property float|null $rating Рейтинг
+ * @property int|null $scores_count Количество оценок
+ * @property string|null $imdb_id IMDb ID
+ * @property string|null $status Статус
+ * @property Carbon $created_at Дата создания
+ * @property Carbon $updated_at Дата обновления
  *
- * @property Collection|Genre[] $genres
- * @property Collection|Actor[] $actors
- * @property Collection|User[] $favoritedByUsers
- * @property Collection|Comment[] $comments
+ * @property-read Collection<int, Genre> $genres Жанры
+ * @property-read Collection<int, Actor> $actors Актёры
+ * @property-read Collection<int, User> favoritedByUsers Пользователи, добавившие в избранное
+ * @property-read Collection<int, Comment> $comments Комментарии
+ * @property-read array $genre Список жанров
+ * @property-read array $starring Список актёров
+ * @property-read int|null $genres_count Количество жанров
+ * @property-read int|null $actors_count Количество актёров
+ * @property-read bool $is_favorite В избранном у текущего пользователя
  */
 class Film extends Model
 {
@@ -45,13 +50,13 @@ class Film extends Model
     public const string STATUS_MODERATE = 'moderate';
     public const string ORDER_BY_RELEASED = 'released';
     public const string ORDER_BY_RATING = 'rating';
-    public const string ORDER_TO_ASC = 'asc';
-    public const string ORDER_TO_DESC = 'desc';
+    public const string ORDER_ASC = 'asc';
+    public const string ORDER_DESC = 'desc';
 
     /**
-     * Атрибуты
+     * Атрибуты, которые можно массово назначать.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = [
         'name',
@@ -72,7 +77,7 @@ class Film extends Model
     ];
 
     /**
-     * Отношения
+     * Отношения, которые всегда загружаются с моделью.
      *
      * @var array
      */
@@ -82,9 +87,9 @@ class Film extends Model
     ];
 
     /**
-     * Атрибуты
+     * Атрибуты, которые должны быть приведены к определенному типу.
      *
-     * @var array
+     * @var array<string, string>
      */
     protected $casts = [
         'released' => 'integer',
@@ -92,9 +97,9 @@ class Film extends Model
     ];
 
     /**
-     * Атрибуты
+     * Дополнительные вычисляемые атрибуты.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $appends = [
         'starring',
@@ -103,31 +108,20 @@ class Film extends Model
     ];
 
     /**
-     * Атрибуты
+     * Скрытые атрибуты.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $hidden = [
         'actors',
         'genres',
     ];
 
-    public static function createFromData(array $data): Film
-    {
-        $film = new self();
-
-        $film->fill($data);
-        $film->status = self::STATUS_PENDING;
-
-        $film->save();
-
-        return $film;
-    }
-
     /**
-     * Связь "многие ко многим" к модели Genre
+     * Связь "многие ко многим" к модели Genre.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Genre>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function genres(): BelongsToMany
     {
@@ -135,9 +129,10 @@ class Film extends Model
     }
 
     /**
-     * Связь "многие ко многим" к модели Actor
+     * Связь "многие ко многим" к модели Actor.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Actor>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function actors(): BelongsToMany
     {
@@ -145,9 +140,10 @@ class Film extends Model
     }
 
     /**
-     * Связь "многие ко многим" к модели User
+     * Связь "многие ко многим" к модели User.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<User>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function favoritedByUsers(): BelongsToMany
     {
@@ -155,9 +151,10 @@ class Film extends Model
     }
 
     /**
-     * Связь "один ко многим" к модели Comment
+     * Связь "один ко многим" к модели Comment.
      *
-     * @return HasMany
+     * @return HasMany<Comment>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function comments(): HasMany
     {
@@ -165,8 +162,9 @@ class Film extends Model
     }
 
     /**
-     * Получает рейтинг фильма
+     * Получает рейтинг фильма.
      *
+     * @psalm-suppress PossiblyUnusedMethod
      * @return void
      */
     public function rating(): void
@@ -179,9 +177,10 @@ class Film extends Model
     }
 
     /**
-     * Получает список жанров
+     * Получает список жанров.
      *
-     * @return array
+     * @psalm-suppress PossiblyUnusedMethod
+     * @return array<int, string>
      */
     public function getGenreAttribute(): array
     {
@@ -189,9 +188,10 @@ class Film extends Model
     }
 
     /**
-     * Получает список актеров
+     * Получает список актеров.
      *
-     * @return array
+     * @psalm-suppress PossiblyUnusedMethod
+     * @return array<int, string>
      */
     public function getStarringAttribute(): array
     {
@@ -199,18 +199,21 @@ class Film extends Model
     }
 
     /**
-     * Проверяет избранный фильм для текущего пользователя
+     * Проверяет избранный фильм для текущего пользователя.
      *
+     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress NoInterfaceProperties
      * @return bool
      */
     public function getIsFavoriteAttribute(): bool
     {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
-        if (Auth::user()) {
-            return $this->favoritedByUsers()->where('user_id', Auth::user()->id)->exists();
+        if ($user !== null) {
+            return $this->favoritedByUsers()->where('user_id', $user->id)->exists();
         }
 
         return false;
     }
-
 }

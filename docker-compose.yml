@@ -1,14 +1,15 @@
-version: '3.8'
-
 services:
   app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: what-to-watch-app
     restart: unless-stopped
     ports:
       - "8000:8000"
     volumes:
       - .:/var/www/html
+      - ./vendor:/var/www/html/vendor:cached
     environment:
       - APP_ENV=local
       - APP_DEBUG=true
@@ -16,7 +17,7 @@ services:
       - DB_CONNECTION=mysql
       - DB_HOST=mysql
       - DB_PORT=3306
-      - DB_DATABASE=what_to_watch
+      - DB_DATABASE=whattowatch
       - DB_USERNAME=root
       - DB_PASSWORD=secret
       - REDIS_HOST=redis
@@ -33,6 +34,8 @@ services:
     image: mysql:8.0
     container_name: what-to-watch-mysql
     restart: unless-stopped
+    ports:
+      - "3306:3306"
     environment:
       MYSQL_ROOT_PASSWORD: secret
       MYSQL_DATABASE: what_to_watch
@@ -48,6 +51,8 @@ services:
     image: redis:7-alpine
     container_name: what-to-watch-redis
     restart: unless-stopped
+    ports:
+      - "6379:6379"
     command: redis-server --appendonly yes
 
 volumes:

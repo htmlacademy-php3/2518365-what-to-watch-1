@@ -9,38 +9,40 @@ use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 
 /**
- * @property int $id
- * @property int $film_id
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property int $id Идентификатор промо
+ * @property int $film_id Идентификатор фильма
+ * @property Carbon $created_at Дата создания
+ * @property Carbon $updated_at Дата обновления
  *
- * @property Film $film
+ * @property-read Film $film Промо-фильм
  */
 class Promo extends Model
 {
     /** @use HasFactory<\Database\Factories\PromoFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory;
+    use Notifiable;
 
     /**
-     * Название таблицы
+     * Название таблицы, связанной с моделью.
      *
      * @var string
      */
     protected $table = 'promo';
 
     /**
-     * Атрибуты
+     * Атрибуты, которые можно массово назначать.
      *
-     * @var string[]
+     * @var array<int, string>
      */
     protected $fillable = [
         'film_id',
     ];
 
     /**
-     * Связь "один к одному" к модели Film
+     * Связь "один к одному" к модели Film.
      *
-     * @return BelongsTo
+     * @return BelongsTo<Film>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function film(): BelongsTo
     {

@@ -8,12 +8,15 @@ use App\Models\Film;
 use App\Models\Promo;
 use Illuminate\Http\Request;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class PromoController extends Controller
 {
     /**
-     * Получение текущего промо-фильма
+     * Получение текущего промо-фильма.
      *
-     * @return BaseResponse Ответ
+     * @return BaseResponse Ответ.
      */
     public function index(): BaseResponse
     {
@@ -22,11 +25,12 @@ class PromoController extends Controller
     }
 
     /**
-     * Установка нового промо-фильма
+     * Установка нового промо-фильма.
      *
-     * @param Request $request Запрос
-     * @param Film $film Объект фильма
-     * @return BaseResponse Ответ
+     * @param Request $request Запрос.
+     * @psalm-suppress PossiblyUnusedParam
+     * @param Film $film Объект фильма.
+     * @return BaseResponse Ответ.
      */
     public function store(Request $request, Film $film): BaseResponse
     {

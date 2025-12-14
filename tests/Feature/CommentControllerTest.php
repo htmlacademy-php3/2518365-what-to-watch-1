@@ -14,86 +14,108 @@ class CommentControllerTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Тест получения списка комментариев к фильму.
+     * Тест на получение структуры комментария в формате JSON.
      *
-     * @return void
+     * @return array
+     */
+    private function getTypicalCommentStructure(): array
+    {
+        return [
+            'data' => [
+                'id',
+                'comment_id',
+                'film_id',
+                'text',
+                'rating',
+                'user_id',
+                'author_name',
+                'created_at',
+            ],
+        ];
+    }
+
+    /**
+     * Тест метода index.
      */
     public function testIndex(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_USER]);
         $film = Film::factory()->create();
         $commentCount = 10;
 
         Comment::factory()->count($commentCount)->create([
             'film_id' => $film->id,
-            'user_id' => $user->id,
         ]);
 
         $response = $this->getJson("/api/films/{$film->id}/comments");
 
         $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonStructure([
+            'data' => [
+                'data' => [
+                    '*' => [
+                        'id',
+                        'comment_id',
+                        'film_id',
+                        'text',
+                        'rating',
+                        'user_id',
+                        'author_name',
+                        'is_external',
+                        'created_at',
+                    ],
+                ],
+            ],
+        ]);
 
-        $responseData = $response->json();
-        $this->assertIsArray($responseData);
+        $comments = $response->json('data.data');
+        $this->assertGreaterThan(0, count($comments));
 
-        if (isset($responseData['success'])) {
-            $this->assertTrue($responseData['success']);
-        }
-
-        if (isset($responseData['data'])) {
-            $data = $responseData['data'];
-            $this->assertIsArray($data);
-
-            if (isset($data['data'])) {
-                $comments = $data['data'];
-                $this->assertNotEmpty($comments);
-
-                $firstComment = $comments[0];
-                $this->assertArrayHasKey('id', $firstComment);
-                $this->assertArrayHasKey('text', $firstComment);
-                $this->assertArrayHasKey('rating', $firstComment);
-                $this->assertArrayHasKey('user_id', $firstComment);
-                $this->assertArrayHasKey('film_id', $firstComment);
-                $this->assertArrayHasKey('author_name', $firstComment);
-            }
+        foreach ($comments as $comment) {
+            $this->assertEquals($film->id, $comment['film_id']);
         }
     }
 
     /**
-     * Тест проверки имени автора внешнего комментария.
-     *
-     * @return void
+     * Тест автора внешнего комментария.
      */
     public function testExternalCommentAuthorName(): void
     {
         $film = Film::factory()->create();
+        Comment::where('film_id', $film->id)->delete();
 
-        Comment::factory()->create([
+        Comment::create([
             'film_id' => $film->id,
+            'user_id' => null,
+            'comment_id' => null,
+            'text' => 'Test comment',
+            'rating' => 5,
             'is_external' => true,
         ]);
 
         $response = $this->getJson("/api/films/{$film->id}/comments");
+
         $response->assertStatus(Response::HTTP_OK);
 
         $responseData = $response->json();
-        $comments = [];
 
-        if (isset($responseData['data']['data'])) {
-            $comments = $responseData['data']['data'];
-        } elseif (isset($responseData['data'])) {
-            $comments = is_array($responseData['data']) ? $responseData['data'] : [];
-        }
+        $this->assertArrayHasKey('data', $responseData);
 
-        foreach ($comments as $comment) {
-            $this->assertEquals(Comment::ANONYMOUS_USER, $comment['author_name'] ?? null);
-        }
+        $paginationData = $responseData['data'];
+        $this->assertArrayHasKey('data', $paginationData);
+
+        $comments = $paginationData['data'];
+
+        $this->assertCount(1, $comments);
+
+        $comment = $comments[0];
+
+        $this->assertEquals(Comment::ANONYMOUS_USER, $comment['author_name']);
+        $this->assertNull($comment['user_id']);
+        $this->assertTrue((bool)$comment['is_external']);
     }
 
     /**
-     * Тест создания комментария неавторизованным пользователем.
-     *
-     * @return void
+     * Тест метода store при отсутствии авторизации.
      */
     public function testStoreUnauthorized(): void
     {
@@ -105,17 +127,19 @@ class CommentControllerTest extends TestCase
         ];
 
         $response = $this->postJson("/api/films/{$film->id}/comments", $data);
+
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+        $response->assertJson([
+            'message' => 'Запрос требует аутентификации',
+        ]);
     }
 
     /**
-     * Тест успешного создания комментария авторизованным пользователем.
-     *
-     * @return void
+     * Тест метода store при авторизации.
      */
     public function testStoreAuthorized(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_USER]);
+        $user = User::factory()->create();
         $film = Film::factory()->create();
 
         $data = [
@@ -124,44 +148,50 @@ class CommentControllerTest extends TestCase
         ];
 
         $response = $this->actingAs($user)->postJson("/api/films/{$film->id}/comments", $data);
-        $response->assertSuccessful();
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonStructure($this->getTypicalCommentStructure());
+        $response->assertJsonPath('data.comment_id', null);
 
         $this->assertDatabaseHas('comments', [
-            'film_id' => $film->id,
             'user_id' => $user->id,
+            'film_id' => $film->id,
             'text' => $data['text'],
             'rating' => $data['rating'],
         ]);
     }
 
     /**
-     * Тест валидации при создании комментария.
-     *
-     * @return void
+     * Тест метода store с некорректными данными.
      */
     public function testStoreValidationError(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_USER]);
+        $user = User::factory()->create();
         $film = Film::factory()->create();
 
         $data = [
-            'text' => 'Короткий',
+            'text' => 'Короткий неправильный комментарий.',
             'rating' => 11,
         ];
 
         $response = $this->actingAs($user)->postJson("/api/films/{$film->id}/comments", $data);
+
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJsonValidationErrors(['text', 'rating']);
+        $response->assertJson([
+            'message' => 'Переданные данные не корректны',
+        ]);
+        $response->assertJsonValidationErrors([
+            'text',
+            'rating',
+        ]);
     }
 
     /**
-     * Тест создания ответа на комментарий.
-     *
-     * @return void
+     * Тест метода store для ответа на комментарий.
      */
     public function testStoreReplyToComment(): void
     {
-        $user = User::factory()->create(['role' => User::ROLE_USER]);
+        $user = User::factory()->create();
         $film = Film::factory()->create();
         $parentComment = Comment::factory()->create(['film_id' => $film->id]);
 
@@ -172,20 +202,22 @@ class CommentControllerTest extends TestCase
         ];
 
         $response = $this->actingAs($user)->postJson("/api/films/{$film->id}/comments", $data);
-        $response->assertSuccessful();
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonStructure($this->getTypicalCommentStructure());
+        $response->assertJsonPath('data.comment_id', $parentComment->id);
 
         $this->assertDatabaseHas('comments', [
-            'film_id' => $film->id,
             'user_id' => $user->id,
-            'comment_id' => $parentComment->id,
+            'film_id' => $film->id,
             'text' => $data['text'],
+            'rating' => $data['rating'],
+            'comment_id' => $data['comment_id'],
         ]);
     }
 
     /**
-     * Тест обновления комментария неавторизованным пользователем.
-     *
-     * @return void
+     * Тест метода update при отсутствии авторизации.
      */
     public function testUpdateUnauthorized(): void
     {
@@ -197,18 +229,23 @@ class CommentControllerTest extends TestCase
         ];
 
         $response = $this->patchJson("/api/comments/{$comment->id}", $data);
+
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+        $response->assertJson([
+            'message' => 'Запрос требует аутентификации',
+        ]);
     }
 
     /**
-     * Тест обновления чужого комментария пользователем.
-     *
-     * @return void
+     * Тест метода update с запретом доступа.
      */
     public function testUpdateForbidden(): void
     {
         $user = User::factory()->create(['role' => User::ROLE_USER]);
-        $comment = Comment::factory()->create();
+        $anotherUser = User::factory()->create();
+        $comment = Comment::factory()->create([
+            'user_id' => $anotherUser->id,
+        ]);
 
         $data = [
             'text' => 'Обновленный текст тестового комментария достаточной длины для прохождения валидации.',
@@ -216,13 +253,15 @@ class CommentControllerTest extends TestCase
         ];
 
         $response = $this->actingAs($user)->patchJson("/api/comments/{$comment->id}", $data);
+
         $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertJson([
+            'message' => 'Недостаточно прав',
+        ]);
     }
 
     /**
-     * Тест успешного обновления собственного комментария.
-     *
-     * @return void
+     * Тест метода update с валидными данными.
      */
     public function testUpdateSuccess(): void
     {
@@ -234,7 +273,11 @@ class CommentControllerTest extends TestCase
         ];
 
         $response = $this->actingAs($comment->user)->patchJson("/api/comments/{$comment->id}", $data);
-        $response->assertSuccessful();
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonStructure($this->getTypicalCommentStructure());
+        $response->assertJsonPath('data.text', $data['text']);
+        $response->assertJsonPath('data.rating', $data['rating']);
 
         $this->assertDatabaseHas('comments', [
             'id' => $comment->id,
@@ -244,9 +287,7 @@ class CommentControllerTest extends TestCase
     }
 
     /**
-     * Тест обновления комментария модератором.
-     *
-     * @return void
+     * Тест метода update для модератора.
      */
     public function testUpdateByModeratorSuccess(): void
     {
@@ -259,7 +300,11 @@ class CommentControllerTest extends TestCase
         ];
 
         $response = $this->actingAs($user)->patchJson("/api/comments/{$comment->id}", $data);
-        $response->assertSuccessful();
+
+        $response->assertStatus(Response::HTTP_OK);
+        $response->assertJsonStructure($this->getTypicalCommentStructure());
+        $response->assertJsonPath('data.text', $data['text']);
+        $response->assertJsonPath('data.rating', $data['rating']);
 
         $this->assertDatabaseHas('comments', [
             'id' => $comment->id,
@@ -269,41 +314,46 @@ class CommentControllerTest extends TestCase
     }
 
     /**
-     * Тест валидации при обновлении комментария.
-     *
-     * @return void
+     * Тест метода update с невалидными данными.
      */
     public function testUpdateValidationError(): void
     {
         $comment = Comment::factory()->create();
 
         $data = [
-            'text' => 'Короткий',
+            'text' => 'Короткий неправильный комментарий.',
             'rating' => 11,
         ];
 
         $response = $this->actingAs($comment->user)->patchJson("/api/comments/{$comment->id}", $data);
+
         $response->assertStatus(Response::HTTP_UNPROCESSABLE_ENTITY);
-        $response->assertJsonValidationErrors(['text', 'rating']);
+        $response->assertJson([
+            'message' => 'Переданные данные не корректны',
+        ]);
+        $response->assertJsonValidationErrors([
+            'text',
+            'rating',
+        ]);
     }
 
     /**
-     * Тест удаления комментария неавторизованным пользователем.
-     *
-     * @return void
+     * Тест метода destroy без авторизации.
      */
     public function testDestroyUnauthorized(): void
     {
         $comment = Comment::factory()->create();
 
         $response = $this->deleteJson("/api/comments/{$comment->id}");
+
         $response->assertStatus(Response::HTTP_UNAUTHORIZED);
+        $response->assertJson([
+            'message' => 'Запрос требует аутентификации',
+        ]);
     }
 
     /**
-     * Тест удаления чужого комментария пользователем.
-     *
-     * @return void
+     * Тест метода destroy с отсутствующими правами.
      */
     public function testDestroyForbidden(): void
     {
@@ -311,30 +361,30 @@ class CommentControllerTest extends TestCase
         $comment = Comment::factory()->create();
 
         $response = $this->actingAs($user)->deleteJson("/api/comments/{$comment->id}");
+
         $response->assertStatus(Response::HTTP_FORBIDDEN);
+        $response->assertJson([
+            'message' => 'Недостаточно прав',
+        ]);
     }
 
     /**
-     * Тест успешного удаления собственного комментария.
-     *
-     * @return void
+     * Тест метода destroy с валидными данными.
      */
     public function testDestroySuccess(): void
     {
         $comment = Comment::factory()->create();
 
         $response = $this->actingAs($comment->user)->deleteJson("/api/comments/{$comment->id}");
-        $response->assertStatus(Response::HTTP_NO_CONTENT);
 
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
         $this->assertDatabaseMissing('comments', [
             'id' => $comment->id,
         ]);
     }
 
     /**
-     * Тест удаления комментария модератором.
-     *
-     * @return void
+     * Тест метода destroy для модератора.
      */
     public function testDestroyByModeratorSuccess(): void
     {
@@ -342,21 +392,20 @@ class CommentControllerTest extends TestCase
         $comment = Comment::factory()->create();
 
         $response = $this->actingAs($user)->deleteJson("/api/comments/{$comment->id}");
-        $response->assertStatus(Response::HTTP_NO_CONTENT);
 
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
         $this->assertDatabaseMissing('comments', [
             'id' => $comment->id,
         ]);
     }
 
     /**
-     * Тест удаления комментария с дочерними комментариями.
-     *
-     * @return void
+     * Тест метода destroy с дочерними комментариями.
      */
     public function testDestroyWithChildrenSuccess(): void
     {
         $childrenCount = 3;
+
         $user = User::factory()->create(['role' => User::ROLE_MODERATOR]);
         $comment = Comment::factory()->create();
 
@@ -366,8 +415,8 @@ class CommentControllerTest extends TestCase
         ]);
 
         $response = $this->actingAs($user)->deleteJson("/api/comments/{$comment->id}");
-        $response->assertStatus(Response::HTTP_NO_CONTENT);
 
+        $response->assertStatus(Response::HTTP_NO_CONTENT);
         $this->assertDatabaseMissing('comments', [
             'id' => $comment->id,
         ]);

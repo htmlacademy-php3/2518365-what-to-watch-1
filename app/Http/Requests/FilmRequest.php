@@ -5,10 +5,13 @@ namespace App\Http\Requests;
 use App\Models\Film;
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @psalm-suppress PossiblyUnusedMethod */
 class FilmRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
+     *
+     * @return bool
      */
     public function authorize(): bool
     {
@@ -26,19 +29,20 @@ class FilmRequest extends FormRequest
             'page' => 'nullable|integer|min:1',
             'genre' => 'nullable|string|exists:genres,name',
             'status' => 'nullable|string|in:' . implode(
-                    ',',
-                    [
+                ',',
+                [
                         Film::STATUS_READY,
                         Film::STATUS_PENDING,
-                        Film::STATUS_MODERATE]
-                ),
+                        Film::STATUS_MODERATE,
+                    ]
+            ),
             'order_by' => 'nullable|string|in:' . implode(',', [
                     Film::ORDER_BY_RELEASED,
-                    Film::ORDER_BY_RATING
+                    Film::ORDER_BY_RATING,
                 ]),
             'order_to' => 'nullable|string|in:' . implode(',', [
-                    Film::ORDER_TO_ASC,
-                    Film::ORDER_TO_DESC
+                    Film::ORDER_ASC,
+                    Film::ORDER_DESC,
                 ]),
         ];
     }

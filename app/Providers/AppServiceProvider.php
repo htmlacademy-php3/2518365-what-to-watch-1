@@ -14,7 +14,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(MovieRepositoryInterface::class, function ($app) {
+        $this->app->bind(MovieRepositoryInterface::class, function () {
             $client = new Client([
                 'timeout' => config('services.omdb.timeout', 10),
                 'connect_timeout' => config('services.omdb.connect_timeout', 5),

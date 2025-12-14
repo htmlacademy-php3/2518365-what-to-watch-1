@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Actor;
 use App\Models\Film;
 use App\Models\Genre;
 

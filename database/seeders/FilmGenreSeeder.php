@@ -14,7 +14,7 @@ class FilmGenreSeeder extends Seeder
         $genres = Genre::all();
 
         foreach ($films as $film) {
-            $randomGenres = $genres->random(rand(1, 5));
+            $randomGenres = $genres->random(rand(1, 3));
             $film->genres()->attach($randomGenres);
         }
     }

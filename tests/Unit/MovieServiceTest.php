@@ -14,7 +14,7 @@ class MovieServiceTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Тестирование метода getMovie() класса MovieService
+     * Тест метода getMovie() класса MovieService.
      */
     public function testMovieServiceData(): void
     {

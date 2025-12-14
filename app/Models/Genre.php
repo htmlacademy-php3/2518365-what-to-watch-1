@@ -9,21 +9,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Support\Carbon;
 
 /**
- * @property int $id
- * @property string $name
- * @property Carbon $created_at
- * @property Carbon $updated_at
+ * @property int $id Идентификатор жанра
+ * @property string $name Название жанра
+ * @property Carbon $created_at Дата создания
+ * @property Carbon $updated_at Дата обновления
  *
- * @property Collection|Film[] $films
+ * @property-read Collection<int, Film> $films Фильмы этого жанра
  */
-
 class Genre extends Model
 {
     /** @use HasFactory<\Database\Factories\GenreFactory> */
     use HasFactory;
 
     /**
-     * Атрибуты
+     * Атрибуты, которые можно массово назначать.
      *
      * @var string[]
      */
@@ -32,9 +31,10 @@ class Genre extends Model
     ];
 
     /**
-     * Связь "многие ко многим" к модели Film
+     * Связь "многие ко многим" к модели Film.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Film>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function films(): BelongsToMany
     {

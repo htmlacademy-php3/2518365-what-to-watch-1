@@ -18,11 +18,12 @@ class FailResponse extends BaseResponse
         $this->errorMessage = $errorMessage ?? $exception->getMessage();
         $statusCode = $statusCode ?? ($exception->getCode() ?: Response::HTTP_INTERNAL_SERVER_ERROR);
 
+        /** @var int $statusCode */
         parent::__construct(null, $statusCode);
     }
 
     /**
-     * Формирование содержимого ответа
+     * Формирование содержимого ответа с ошибкой.
      *
      * @return array|null
      */
