@@ -7,6 +7,9 @@ use App\Http\Responses\BaseResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Models\Genre;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class GenreController extends Controller
 {
     /**

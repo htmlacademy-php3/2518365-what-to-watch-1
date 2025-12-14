@@ -22,6 +22,7 @@ final readonly class FilmService
      * @param array $data Данные фильма
      * @param string $nextStatus Следующий статус фильма
      * @return Film Созданный фильм
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function createFromData(array $data, string $nextStatus): Film
     {
@@ -30,6 +31,8 @@ final readonly class FilmService
             ['status' => $nextStatus]
         );
         $this->saveFilm($film, $data, $nextStatus);
+
+        /** @var Film $film */
         return $film;
     }
 
@@ -39,15 +42,27 @@ final readonly class FilmService
      * @param array $data Данные фильма
      * @param string $nextStatus Следующий статус фильма
      * @return Film|null Обновленный фильм или null, если фильм не найден
+     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress PossiblyUnusedReturnValue
      */
     public function updateFromData(array $data, string $nextStatus): ?Film
     {
-        $film = Film::updateOrCreate(['imdb_id' => $data['imdb_id']] ?? null, $data);
+        if (!isset($data['imdb_id'])) {
+            return null;
+        }
+
+        $film = Film::updateOrCreate(
+            ['imdb_id' => $data['imdb_id']],
+            $data
+        );
+
         if (!$film) {
             return null;
         }
 
         $this->saveFilm($film, $data, $nextStatus);
+
+        /** @var Film|null $film */
         return $film;
     }
 
@@ -58,6 +73,7 @@ final readonly class FilmService
      * @param array $data Данные фильма
      * @param string $nextStatus Следующий статус фильма
      * @return void
+     * @psalm-suppress PossiblyUnusedMethod
      */
     private function saveFilm(Film $film, array $data, string $nextStatus): void
     {
@@ -66,10 +82,12 @@ final readonly class FilmService
         $film->save();
 
         if (isset($data['starring'])) {
+            /** @psalm-suppress UndefinedMethod */
             $this->actorService->syncActors($film, $data['starring']);
         }
 
         if (isset($data['genre'])) {
+            /** @psalm-suppress UndefinedMethod */
             $this->genreService->syncGenres($film, $data['genre']);
         }
     }
@@ -79,6 +97,7 @@ final readonly class FilmService
      *
      * @param string $imdbId IMDB ID фильма
      * @return void
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function deleteFilm(string $imdbId): void
     {

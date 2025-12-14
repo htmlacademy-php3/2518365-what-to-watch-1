@@ -10,6 +10,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * Контроллер для аутентификации пользователей.
+ *
+ * @psalm-suppress UnusedClass
+ */
 class AuthController extends Controller
 {
     /**
@@ -20,12 +25,19 @@ class AuthController extends Controller
      */
     public function login(LoginRequest $request): BaseResponse
     {
+        /** @psalm-suppress UndefinedMethod */
         if (!Auth::guard('web')->attempt($request->validated())) {
             return new FailResponse(trans('auth.failed'), Response::HTTP_UNAUTHORIZED);
         }
 
         $request->session()->regenerate();
-        $token = Auth::user()->createToken('auth_token')->plainTextToken;
+
+        /**
+         * @var \App\Models\User $user
+         * @psalm-suppress UndefinedMethod
+         */
+        $user = Auth::user();
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return new SuccessResponse([
             'token' => $token,
@@ -35,11 +47,22 @@ class AuthController extends Controller
     /**
      * Выход пользователя.
      *
+     * @param Request $request Запрос.
      * @return BaseResponse Ответ.
      */
     public function logout(Request $request): BaseResponse
     {
-        Auth::user()->tokens()->delete();
+        /**
+         * @var \App\Models\User|null $user
+         * @psalm-suppress UndefinedMethod
+         */
+        $user = Auth::user();
+
+        if ($user) {
+            /** @psalm-suppress UndefinedMethod */
+            $user->tokens()->delete();
+        }
+
         $request->session()->invalidate();
 
         return new SuccessResponse(null, Response::HTTP_NO_CONTENT);

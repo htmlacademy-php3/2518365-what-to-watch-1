@@ -6,6 +6,7 @@ use App\Models\Film;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
+/** @psalm-suppress PossiblyUnusedMethod */
 class StoreFilmRequest extends FormRequest
 {
     /**

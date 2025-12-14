@@ -18,7 +18,9 @@ use Illuminate\Support\Carbon;
  */
 class Promo extends Model
 {
-    use HasFactory, Notifiable;
+    /** @use HasFactory<\Database\Factories\PromoFactory> */
+    use HasFactory;
+    use Notifiable;
 
     /**
      * Название таблицы, связанной с моделью.
@@ -39,7 +41,8 @@ class Promo extends Model
     /**
      * Связь "один к одному" к модели Film.
      *
-     * @return BelongsTo
+     * @return BelongsTo<Film>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function film(): BelongsTo
     {

@@ -16,6 +16,9 @@ use App\Services\GenreService;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class FilmController extends Controller
 {
     protected const int PAGE_COUNT = 8;
@@ -34,14 +37,17 @@ class FilmController extends Controller
         $order_by = $request->query('order_by', Film::ORDER_BY_RELEASED);
         $order_to = $request->query('order_to', Film::ORDER_DESC);
 
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
+        /** @psalm-suppress UndefinedMethod */
         if ($user && $user->cannot('viewWithStatus', [Film::class, $status])) {
             return new FailResponse("Недостаточно прав для просмотра фильмов в статусе $status", Response::HTTP_FORBIDDEN);
         }
 
         $films = Film::query()
-            ->select('id', 'name', 'preview_image', 'released', 'rating')
+            /** @psalm-suppress TooManyArguments */
+            ->select(['id', 'name', 'preview_image', 'released', 'rating'])
             ->when($genre, function ($query, $genre) {
                 return $query->whereRelation('genres', 'name', $genre);
             })
@@ -97,10 +103,12 @@ class FilmController extends Controller
         $film->update($request->validated());
 
         if ($request->has('starring')) {
+            /** @psalm-suppress UndefinedMethod */
             app(ActorService::class)->syncActors($film, $request->input('starring'));
         }
 
         if ($request->has('genre')) {
+            /** @psalm-suppress UndefinedMethod */
             app(GenreService::class)->syncGenres($film, $request->input('genre'));
         }
 

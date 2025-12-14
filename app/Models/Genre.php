@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  */
 class Genre extends Model
 {
+    /** @use HasFactory<\Database\Factories\GenreFactory> */
     use HasFactory;
 
     /**
@@ -32,7 +33,8 @@ class Genre extends Model
     /**
      * Связь "многие ко многим" к модели Film.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Film>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function films(): BelongsToMany
     {

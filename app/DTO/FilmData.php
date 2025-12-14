@@ -42,8 +42,7 @@ class FilmData
         int    $run_time,
         int    $released,
         string $imdb_id,
-    )
-    {
+    ) {
         $this->name = $name;
         $this->description = $description;
         $this->director = $director;

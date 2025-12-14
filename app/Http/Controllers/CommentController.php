@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class CommentController extends Controller
 {
     /**
@@ -35,18 +38,20 @@ class CommentController extends Controller
      */
     public function store(CommentRequest $request, Film $film): BaseResponse
     {
+        /** @var \App\Models\User $user */
+        $user = Auth::user();
 
         $comment = $film->comments()->create([
             'comment_id' => $request->get('comment_id', null),
             'text' => $request->input('text'),
             'rating' => $request->input('rating'),
-            'user_id' => Auth::user()->id,
+            'user_id' => $user->id,
         ]);
 
+        /** @psalm-suppress UndefinedMethod */
         $film->rating();
 
         return new SuccessResponse($comment);
-
     }
 
     /**
@@ -58,8 +63,10 @@ class CommentController extends Controller
      */
     public function update(CommentRequest $request, Comment $comment): BaseResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
+        /** @psalm-suppress UndefinedMethod */
         if ($user && $user->cannot('update', $comment)) {
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
@@ -70,6 +77,7 @@ class CommentController extends Controller
         ]);
 
         $film = $comment->film;
+        /** @psalm-suppress UndefinedMethod */
         $film->rating();
 
         return new SuccessResponse($comment);
@@ -79,20 +87,23 @@ class CommentController extends Controller
      * Удаление отзыва к фильму.
      *
      * @param Request $request Запрос.
-     * @param Comment $comment Объект отзыва.
-     * @return BaseResponse Ответ.
+     * @psalm-suppress PossiblyUnusedParam
      */
     public function destroy(Request $request, Comment $comment): BaseResponse
     {
+        /** @var \App\Models\User|null $user */
         $user = Auth::user();
 
+        /** @psalm-suppress UndefinedMethod */
         if ($user && $user->cannot('delete', $comment)) {
             return new FailResponse('Недостаточно прав', Response::HTTP_FORBIDDEN);
         }
+
         $comment->children()->delete();
         $comment->delete();
 
         $film = $comment->film;
+        /** @psalm-suppress UndefinedMethod */
         $film->rating();
 
         return new SuccessResponse(null, Response::HTTP_NO_CONTENT);

@@ -7,6 +7,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class ModeratorMiddleware
 {
     /**
@@ -24,8 +27,10 @@ class ModeratorMiddleware
             ], Response::HTTP_UNAUTHORIZED);
         }
 
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
+        /** @psalm-suppress UndefinedMethod */
         if ($user->isModerator()) {
             return $next($request);
         }

@@ -8,6 +8,9 @@ use App\Models\Film;
 use App\Models\Promo;
 use Illuminate\Http\Request;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class PromoController extends Controller
 {
     /**
@@ -25,6 +28,7 @@ class PromoController extends Controller
      * Установка нового промо-фильма.
      *
      * @param Request $request Запрос.
+     * @psalm-suppress PossiblyUnusedParam
      * @param Film $film Объект фильма.
      * @return BaseResponse Ответ.
      */

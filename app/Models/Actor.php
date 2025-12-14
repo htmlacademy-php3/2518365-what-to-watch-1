@@ -18,6 +18,7 @@ use Illuminate\Support\Carbon;
  */
 class Actor extends Model
 {
+    /** @use HasFactory<\Database\Factories\ActorFactory> */
     use HasFactory;
 
     /**
@@ -32,7 +33,8 @@ class Actor extends Model
     /**
      * Связь "многие ко многим" к модели Film.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Film>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function films(): BelongsToMany
     {

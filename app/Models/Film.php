@@ -42,6 +42,7 @@ use Illuminate\Support\Facades\Auth;
  */
 class Film extends Model
 {
+    /** @use HasFactory<\Database\Factories\FilmFactory> */
     use HasFactory;
 
     public const string STATUS_READY = 'ready';
@@ -119,7 +120,8 @@ class Film extends Model
     /**
      * Связь "многие ко многим" к модели Genre.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Genre>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function genres(): BelongsToMany
     {
@@ -129,7 +131,8 @@ class Film extends Model
     /**
      * Связь "многие ко многим" к модели Actor.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Actor>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function actors(): BelongsToMany
     {
@@ -139,7 +142,8 @@ class Film extends Model
     /**
      * Связь "многие ко многим" к модели User.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<User>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function favoritedByUsers(): BelongsToMany
     {
@@ -149,7 +153,8 @@ class Film extends Model
     /**
      * Связь "один ко многим" к модели Comment.
      *
-     * @return HasMany
+     * @return HasMany<Comment>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function comments(): HasMany
     {
@@ -159,6 +164,7 @@ class Film extends Model
     /**
      * Получает рейтинг фильма.
      *
+     * @psalm-suppress PossiblyUnusedMethod
      * @return void
      */
     public function rating(): void
@@ -173,7 +179,8 @@ class Film extends Model
     /**
      * Получает список жанров.
      *
-     * @return array
+     * @psalm-suppress PossiblyUnusedMethod
+     * @return array<int, string>
      */
     public function getGenreAttribute(): array
     {
@@ -183,7 +190,8 @@ class Film extends Model
     /**
      * Получает список актеров.
      *
-     * @return array
+     * @psalm-suppress PossiblyUnusedMethod
+     * @return array<int, string>
      */
     public function getStarringAttribute(): array
     {
@@ -193,16 +201,19 @@ class Film extends Model
     /**
      * Проверяет избранный фильм для текущего пользователя.
      *
+     * @psalm-suppress PossiblyUnusedMethod
+     * @psalm-suppress NoInterfaceProperties
      * @return bool
      */
     public function getIsFavoriteAttribute(): bool
     {
+        /** @var \App\Models\User|null $user */
+        $user = Auth::user();
 
-        if (Auth::user()) {
-            return $this->favoritedByUsers()->where('user_id', Auth::user()->id)->exists();
+        if ($user !== null) {
+            return $this->favoritedByUsers()->where('user_id', $user->id)->exists();
         }
 
         return false;
     }
-
 }

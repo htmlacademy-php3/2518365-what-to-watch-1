@@ -7,6 +7,9 @@ use App\Http\Responses\SuccessResponse;
 use App\Models\Film;
 use Symfony\Component\HttpFoundation\Response;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 final class SimilarController extends Controller
 {
     private const int SIMILAR_FILMS_COUNT = 4;

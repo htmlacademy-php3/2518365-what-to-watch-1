@@ -1,4 +1,4 @@
-FROM php:8.3-cli-alpine
+FROM php:8.3.16-cli-alpine
 
 # Устанавливаем системные зависимости
 RUN apk add --no-cache \
@@ -12,8 +12,6 @@ RUN apk add --no-cache \
     freetype-dev \
     libxml2-dev \
     oniguruma-dev \
-    nodejs \
-    npm \
     mysql-client
 
 # Устанавливаем PHP расширения
@@ -37,12 +35,6 @@ COPY . .
 
 # Устанавливаем PHP зависимости
 RUN composer install --no-interaction --no-progress --optimize-autoloader
-
-# Устанавливаем Node.js зависимости
-RUN npm install
-
-# Собираем фронтенд
-RUN npm run build
 
 # Устанавливаем права
 RUN chmod -R 775 storage bootstrap/cache

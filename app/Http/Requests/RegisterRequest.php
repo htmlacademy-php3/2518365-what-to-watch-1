@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+/** @psalm-suppress PossiblyUnusedMethod */
 class RegisterRequest extends FormRequest
 {
     /**

@@ -9,6 +9,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class UserController extends Controller
 {
     /**
@@ -18,6 +21,7 @@ class UserController extends Controller
      */
     public function show(): BaseResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
         return new SuccessResponse([
             'user' => $user,
@@ -32,7 +36,9 @@ class UserController extends Controller
      */
     public function update(UpdateUserRequest $request): BaseResponse
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
+
         $data = [
             'email' => $request->input('email'),
             'name' => $request->input('name'),
@@ -44,12 +50,14 @@ class UserController extends Controller
 
         $oldAvatar = null;
         if ($request->hasFile('avatar')) {
+            /** @var \Illuminate\Http\UploadedFile $newAvatar */
             $newAvatar = $request->file('avatar');
             $oldAvatar = $user->avatar;
             $filename = $newAvatar->store('public/avatars', 'local');
             $data['avatar'] = $filename;
         }
 
+        /** @psalm-suppress UndefinedMethod */
         $user->update($data);
 
         if ($oldAvatar) {

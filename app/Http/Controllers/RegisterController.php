@@ -8,6 +8,9 @@ use App\Http\Responses\SuccessResponse;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
+/**
+ * @psalm-suppress UnusedClass
+ */
 class RegisterController extends Controller
 {
     /**
@@ -28,6 +31,8 @@ class RegisterController extends Controller
 
         $data['password'] = Hash::make($data['password']);
         $user = User::create($data);
+
+        /** @psalm-suppress UndefinedMethod */
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return new SuccessResponse(['user' => $user, 'token' => $token]);

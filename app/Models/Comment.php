@@ -24,11 +24,12 @@ use Illuminate\Support\Carbon;
  * @property-read Film $film Фильм
  * @property-read Comment|null $parent Родительский комментарий
  * @property-read Collection<int, Comment> $children Дочерние комментарии
- * @property-read int|null $children_count Количество дочерних комментариев
+ * @property-read int|null $children_count Количество дочерних комментарий
  * @property-read string $author_name Имя автора
  */
 class Comment extends Model
 {
+    /** @use HasFactory<\Database\Factories\CommentFactory> */
     use HasFactory;
 
     public const string ANONYMOUS_USER = 'Гость';
@@ -59,7 +60,7 @@ class Comment extends Model
     /**
      * Связь "один ко многим" к модели User.
      *
-     * @return BelongsTo
+     * @return BelongsTo<User>
      */
     public function user(): BelongsTo
     {
@@ -69,7 +70,7 @@ class Comment extends Model
     /**
      * Связь "один ко многим" к модели Film.
      *
-     * @return BelongsTo
+     * @return BelongsTo<Film>
      */
     public function film(): BelongsTo
     {
@@ -79,21 +80,21 @@ class Comment extends Model
     /**
      * Связь "многие к одному" к модели Comment (родительский комментарий).
      *
-     * @return BelongsTo
+     * @return BelongsTo<self>
      */
     public function parent(): BelongsTo
     {
-        return $this->belongsTo(Comment::class, 'comment_id');
+        return $this->belongsTo(self::class, 'comment_id');
     }
 
     /**
      * Связь "один ко многим" к модели Comment (дочерние комментарии).
      *
-     * @return HasMany
+     * @return HasMany<self>
      */
     public function children(): HasMany
     {
-        return $this->hasMany(Comment::class, 'comment_id');
+        return $this->hasMany(self::class, 'comment_id');
     }
 
     /**
@@ -117,7 +118,14 @@ class Comment extends Model
             return self::ANONYMOUS_USER;
         }
 
-        return $this->user->name;
+        /** @var User|null $user */
+        $user = $this->user;
+
+        if ($user === null) {
+            return self::ANONYMOUS_USER;
+        }
+
+        return $user->name;
     }
 
     /**

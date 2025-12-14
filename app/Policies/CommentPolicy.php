@@ -5,6 +5,9 @@ namespace App\Policies;
 use App\Models\Comment;
 use App\Models\User;
 
+/**
+ * @psalm-suppress PossiblyUnusedMethod
+ */
 class CommentPolicy
 {
     /**

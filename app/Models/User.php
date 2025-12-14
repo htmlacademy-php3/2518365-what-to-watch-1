@@ -26,7 +26,11 @@ use Laravel\Sanctum\HasApiTokens;
  */
 class User extends Authenticatable
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    /** @use HasApiTokens<\Laravel\Sanctum\PersonalAccessToken> */
+    use HasApiTokens;
+    /** @use HasFactory<\Database\Factories\UserFactory> */
+    use HasFactory;
+    use Notifiable;
 
     public const string ROLE_USER = 'user';
     public const string ROLE_MODERATOR = 'moderator';
@@ -56,7 +60,8 @@ class User extends Authenticatable
     /**
      * Связь "многие ко многим" к модели Film.
      *
-     * @return BelongsToMany
+     * @return BelongsToMany<Film>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function favoriteFilms(): BelongsToMany
     {
@@ -66,7 +71,8 @@ class User extends Authenticatable
     /**
      * Связь "один ко многим" к модели Comment.
      *
-     * @return HasMany
+     * @return HasMany<Comment>
+     * @psalm-suppress PossiblyUnusedMethod
      */
     public function comments(): HasMany
     {
@@ -76,6 +82,7 @@ class User extends Authenticatable
     /**
      * Проверяет роль модератора у пользователя.
      *
+     * @psalm-suppress PossiblyUnusedMethod
      * @return bool
      */
     public function isModerator(): bool
@@ -86,6 +93,7 @@ class User extends Authenticatable
     /**
      * Проверяет фильм в избранном у пользователя.
      *
+     * @psalm-suppress PossiblyUnusedMethod
      * @param int $filmId ID фильма.
      *
      * @return bool

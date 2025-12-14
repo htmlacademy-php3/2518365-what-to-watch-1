@@ -5,6 +5,9 @@ namespace App\Policies;
 use App\Models\Film;
 use App\Models\User;
 
+/**
+ * @psalm-suppress PossiblyUnusedMethod
+ */
 class FilmPolicy
 {
     /**
